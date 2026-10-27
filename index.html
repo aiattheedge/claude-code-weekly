@@ -1,25 +1,25 @@
 <!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Claude Code Latest: Oct 26, 2026</title>
-<meta name="description" content="Five Claude Code plugin features you can paste and run today, with copy-ready snippets.">
-<meta property="og:type" content="article">
-<meta property="og:site_name" content="Claude Code Latest">
-<meta property="og:title" content="Five things you can paste and run in Claude Code today">
-<meta property="og:description" content="Five Claude Code plugin features with copy-ready snippets: a security check, skill reloads, safer hooks, one-command plugin packs and plugin tests.">
-<meta property="og:url" content="https://ijmichel.github.io/claude-code-weekly/">
-<meta property="og:image" content="https://ijmichel.github.io/claude-code-weekly/og-cover-v2.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="627">
-<meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.googleapis.com">
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Claude Code Latest: v2.1.311 hooks, skills and plugins</title>
+<meta name="description" content="Five Claude Code changes from v2.1.309 to v2.1.311 you can paste and run: blocking hooks, skill name prefixes, once hooks, plugin tags and evals.">
+<link rel="canonical" href="https://ijmichel.github.io/claude-code-weekly/">
+<meta property="og:type" content="article"><meta property="og:site_name" content="Claude Code Latest">
+<meta property="og:title" content="Claude Code Latest: v2.1.311 hooks, skills and plugins"><meta property="og:description" content="Five Claude Code changes from v2.1.309 to v2.1.311 you can paste and run: blocking hooks, skill name prefixes, once hooks, plugin tags and evals.">
+<meta property="og:url" content="https://ijmichel.github.io/claude-code-weekly/"><meta property="og:image" content="https://ijmichel.github.io/claude-code-weekly/og-cover-v3.png">
+<meta property="og:image:width" content="1200"><meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Claude Code Latest: v2.1.311 hooks, skills and plugins"><meta name="twitter:description" content="Five Claude Code changes from v2.1.309 to v2.1.311 you can paste and run: blocking hooks, skill name prefixes, once hooks, plugin tags and evals."><meta name="twitter:image" content="https://ijmichel.github.io/claude-code-weekly/og-cover-v3.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,700;1,6..72,500&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
-:root{--bg:#0b0b0a;--panel:#151413;--panel2:#1d1b19;--line:#2c2926;--fg:#f3efe9;--muted:#a8a199;--orange:#ff7a1a;--clay:#d97757;--glow:rgba(255,122,26,.16);--code:#0f0e0d;--serif:'Newsreader',Georgia,serif;--sans:'DM Sans',system-ui,sans-serif;--mono:'JetBrains Mono',ui-monospace,Menlo,monospace;color-scheme:dark}
+/* Layout: black editorial page, orange accent, 10-second quick-run list up top, one icon tile per feature. Deliberately single-theme (Claude Code dark). */
+:root{
+  --bg:#0b0b0a; --panel:#151413; --panel2:#1d1b19; --line:#2c2926;
+  --fg:#f3efe9; --muted:#a8a199; --orange:#ff7a1a; --clay:#d97757; --glow:rgba(255,122,26,.16);
+  --code:#0f0e0d; --serif:'Newsreader',Georgia,serif; --sans:'DM Sans',system-ui,sans-serif; --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:17px;line-height:1.6;margin:0;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:17px;line-height:1.6;margin:0;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0}
 .wrap{max-width:820px;margin:0 auto;padding-block:40px 72px}
 a{color:var(--orange)}
 .hero{border-bottom:1px solid var(--line);padding-bottom:32px;margin-bottom:28px}
@@ -81,155 +81,213 @@ ul.src{padding-left:20px;margin:8px 0}
 .tl .copy{position:static}
 @media (max-width:520px){.row{grid-template-columns:1fr}.icon{width:60px;height:60px;border-radius:16px}.icon svg{width:34px;height:34px}.feature{padding:18px}}
 </style>
-</head>
-<body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
-<symbol id="i-shield" viewBox="0 0 48 48"><path d="M24 4 8 10v12c0 10 7 18 16 22 9-4 16-12 16-22V10L24 4Z" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linejoin="round"/><path d="m16 24 6 6 11-12" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
-<symbol id="i-bolt" viewBox="0 0 48 48"><path d="M27 4 10 27h12l-3 17 19-24H26L27 4Z" fill="currentColor"/></symbol>
-<symbol id="i-hook" viewBox="0 0 48 48"><path d="M24 4v22a8 8 0 1 1-8-8" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/><circle cx="24" cy="8" r="4" fill="currentColor"/><path d="M12 14h8" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/></symbol>
-<symbol id="i-box" viewBox="0 0 48 48"><path d="M24 5 6 14v20l18 9 18-9V14L24 5Z" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linejoin="round"/><path d="M6 14l18 9 18-9M24 23v20" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linejoin="round"/></symbol>
-<symbol id="i-flask" viewBox="0 0 48 48"><path d="M18 5h12M20 5v13L9 38a4 4 0 0 0 3.6 6h22.8A4 4 0 0 0 39 38L28 18V5" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 32h20" stroke="currentColor" stroke-width="3.2"/></symbol>
-</defs></svg>
-<div class="wrap">
-<header class="hero">
-<div class="kicker"><i></i> Claude Code · Latest · Oct 26, 2026</div>
-<h1>Five things you can <em>paste and run</em> in <span style="color:var(--orange)">Claude Code</span> today</h1>
-<p class="lede">Plugins add new skills and tools to Claude Code. This week I picked five features you can try right now. Two are new. Three are easy to miss. Each one comes with a snippet you can copy.</p>
-<div class="stats"><span class="chip"><b>5</b> features</span><span class="chip"><b>2</b> new this week</span><span class="chip"><b>5</b> copy-paste snippets</span></div>
-</header>
-<section class="tldr" aria-label="Ten second version">
-<h2>The 10-second version</h2>
-<div class="tl"><span class="n">01</span><code>/claude-api managed-agents-secure</code><button class="copy" type="button" data-t="/claude-api managed-agents-secure">Copy</button></div>
-<div class="tl"><span class="n">02</span><code>/reload-skills</code><button class="copy" type="button" data-t="/reload-skills">Copy</button></div>
-<div class="tl"><span class="n">03</span><code>"onFailure": "block"</code><button class="copy" type="button" data-t='"onFailure": "block"'>Copy</button></div>
-<div class="tl"><span class="n">04</span><code>claude plugin install backend-standard@your-marketplace</code><button class="copy" type="button" data-t="claude plugin install backend-standard@your-marketplace">Copy</button></div>
-<div class="tl"><span class="n">05</span><code>claude plugin eval .</code><button class="copy" type="button" data-t="claude plugin eval .">Copy</button></div>
-</section>
-<h2 class="toc-h">In this issue</h2>
-<nav class="toc" aria-label="Table of contents">
-<a href="#f1"><svg><use href="#i-shield"/></svg><div><small>Security · New</small><span>Audit your agents against Anthropic's guide</span></div></a>
-<a href="#f2"><svg><use href="#i-bolt"/></svg><div><small>Skills · Changed</small><span>Test a skill the second you save it</span></div></a>
-<a href="#f3"><svg><use href="#i-hook"/></svg><div><small>Hooks · Easy to miss</small><span>Stop a tool call when your hook breaks</span></div></a>
-<a href="#f4"><svg><use href="#i-box"/></svg><div><small>Packaging · Easy to miss</small><span>One command installs a whole toolkit</span></div></a>
-<a href="#f5"><svg><use href="#i-flask"/></svg><div><small>Testing · Easy to miss</small><span>Give your plugin a report card</span></div></a>
-</nav>
-<article class="feature" id="f1">
-<div class="fhead"><div class="icon"><svg><use href="#i-shield"/></svg></div><div><div class="cat">Security <span class="tag new">NEW · v2.1.304</span></div><h3>Audit your agents against Anthropic's own security guide</h3></div></div>
-<p class="hook">Shipping an agent and not sure the settings are safe?</p>
-<div class="badges"><span class="badge"><b>Time</b> 2 min</span><span class="badge"><b>Level</b> beginner</span><span class="badge"><b>For</b> agent builders</span></div>
-<div class="row"><b>What</b><div>A skill is a saved set of instructions that Claude follows. The built-in <code>/claude-api</code> skill has a new check. It compares your Managed Agents settings with Anthropic's published security guide. It does not change anything.</div></div>
-<div class="row"><b>Why</b><div>You get a safe review before you ship.</div></div>
-<div class="row"><b>Needs</b><div>Version 2.1.304 or later.</div></div>
-<div class="path">Run inside a Claude Code session, in a project that has agent settings:</div>
-<div class="codebox"><pre>/claude-api managed-agents-secure</pre></div>
-<div class="check"><b>Did it work?</b> Claude lists where your settings differ from the guide. Your files stay the same.</div>
-</article>
-<article class="feature" id="f2">
-<div class="fhead"><div class="icon"><svg><use href="#i-bolt"/></svg></div><div><div class="cat">Skills <span class="tag new">CHANGED · v2.1.304</span></div><h3>Test a skill the second you save it</h3></div></div>
-<p class="hook">Tired of restarting just to test a new skill?</p>
-<div class="badges"><span class="badge"><b>Time</b> 5 min</span><span class="badge"><b>Level</b> beginner</span><span class="badge"><b>For</b> solo devs</span></div>
-<div class="row"><b>What</b><div>You can add a new skill folder while a session is open. <code>/reload-skills</code> makes Claude see it. Since v2.1.304 it sends only new or changed skills. That keeps your chat small.</div></div>
-<div class="row"><b>Why</b><div>Write a skill, reload, and try it. No restart.</div></div>
-<div class="row"><b>Needs</b><div>The docs name no version for the command. The newer behavior is in 2.1.304.</div></div>
-<div class="path">.claude/skills/explain-code/SKILL.md (the usual place for a project skill; text adapted from the docs example)</div>
-<div class="codebox"><pre>---
-name: explain-code
-description: Explain what a piece of code does in plain words
-disable-model-invocation: true
----
 
-Explain the code I point to. Use short sentences.</pre></div>
-<div class="path">Then, in your open session:</div>
-<div class="codebox"><pre>/reload-skills</pre></div>
-<div class="check"><b>Did it work?</b> Type <code>/</code> and look for <code>explain-code</code> in the menu.</div>
-</article>
-<article class="feature" id="f3">
-<div class="fhead"><div class="icon"><svg><use href="#i-hook"/></svg></div><div><div class="cat">Hooks <span class="tag miss">EASY TO MISS · v2.1.295</span></div><h3>Stop a tool call when your hook breaks</h3></div></div>
-<p class="hook">What happens if your safety check crashes?</p>
-<div class="badges"><span class="badge"><b>Time</b> 10 min</span><span class="badge"><b>Level</b> intermediate</span><span class="badge"><b>For</b> team leads</span></div>
-<div class="row"><b>What</b><div>A hook is a small program that runs at a set moment, like before a command. The <code>onFailure</code> setting tells Claude Code what to do if your hook fails. The docs list two values: <code>block</code> and <code>continue</code>.</div></div>
-<div class="row"><b>Why</b><div>A broken safety check will not quietly let risky commands through.</div></div>
-<div class="row"><b>Needs</b><div>Version 2.1.295 or later.</div></div>
-<div class="path">.claude/settings.json (swap in your own script path)</div>
-<div class="codebox"><pre>{
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-shield" viewBox="0 0 48 48"><path d="M24 4 8 10v12c0 10 7 18 16 22 9-4 16-12 16-22V10L24 4Z" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linejoin="round"/><path d="m16 24 6 6 11-12" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-bolt" viewBox="0 0 48 48"><path d="M27 4 10 27h12l-3 17 19-24H26L27 4Z" fill="currentColor"/></symbol>
+    <symbol id="i-hook" viewBox="0 0 48 48"><path d="M24 4v22a8 8 0 1 1-8-8" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/><circle cx="24" cy="8" r="4" fill="currentColor"/><path d="M12 14h8" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/></symbol>
+    <symbol id="i-box" viewBox="0 0 48 48"><path d="M24 5 6 14v20l18 9 18-9V14L24 5Z" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linejoin="round"/><path d="M6 14l18 9 18-9M24 23v20" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linejoin="round"/></symbol>
+    <symbol id="i-flask" viewBox="0 0 48 48"><path d="M18 5h12M20 5v13L9 38a4 4 0 0 0 3.6 6h22.8A4 4 0 0 0 39 38L28 18V5" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 32h20" stroke="currentColor" stroke-width="3.2"/></symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <header class="hero">
+    <div class="kicker"><i></i> Claude Code · Latest · Oct 27, 2026</div>
+    <h1>Claude Code <em>v2.1.311</em>: five things you can <span style="color:var(--orange)">paste and run</span></h1>
+    <p class="lede">Anthropic shipped three releases in four days (2.1.309 to 2.1.311). I read the changelog and the docs pages behind it, and picked five changes to hooks, skills and plugins you can try now. Each one has a snippet you can copy.</p>
+    <div class="stats"><span class="chip"><b>3</b> releases read</span><span class="chip"><b>5</b> features</span><span class="chip"><b>5</b> copy-paste snippets</span></div>
+  </header>
+
+  <section class="tldr" aria-label="Ten second version">
+    <h2>The 10-second version</h2>
+    <div class="tl"><span class="n">01</span><code>exit 2</code><button class="copy" type="button" data-t="exit 2">Copy</button></div>
+    <div class="tl"><span class="n">02</span><code>claude --add-dir ../cli</code><button class="copy" type="button" data-t="claude --add-dir ../cli">Copy</button></div>
+    <div class="tl"><span class="n">03</span><code>once: true</code><button class="copy" type="button" data-t="once: true">Copy</button></div>
+    <div class="tl"><span class="n">04</span><code>claude plugin tag --push</code><button class="copy" type="button" data-t="claude plugin tag --push">Copy</button></div>
+    <div class="tl"><span class="n">05</span><code>claude plugin eval .</code><button class="copy" type="button" data-t="claude plugin eval .">Copy</button></div>
+  </section>
+
+  <h2 class="toc-h">In this issue</h2>
+  <nav class="toc" aria-label="Table of contents">
+    <a href="#f1"><svg><use href="#i-hook"/></svg><div><small>Hooks · Fixed</small><span>Make a hook say no</span></div></a>
+    <a href="#f2"><svg><use href="#i-bolt"/></svg><div><small>Skills · New</small><span>Two skills, same name, no clash</span></div></a>
+    <a href="#f3"><svg><use href="#i-shield"/></svg><div><small>Skills · Fixed</small><span>Run a setup step once</span></div></a>
+    <a href="#f4"><svg><use href="#i-box"/></svg><div><small>Plugins · Docs</small><span>Pin the plugins you depend on</span></div></a>
+    <a href="#f5"><svg><use href="#i-flask"/></svg><div><small>Testing · Docs</small><span>Give your plugin a report card</span></div></a>
+  </nav>
+
+  <article class="feature" id="f1">
+    <div class="fhead"><div class="icon"><svg><use href="#i-hook"/></svg></div>
+      <div><div class="cat">Hooks <span class="tag new">FIXED · v2.1.309</span></div><h3>Make a hook say no</h3></div></div>
+    <p class="hook">Can a tiny script stop Claude from running a risky command?</p>
+    <div class="badges"><span class="badge"><b>Time</b> 10 min</span><span class="badge"><b>Level</b> intermediate</span><span class="badge"><b>For</b> team leads</span></div>
+    <div class="row"><b>What</b><div>A hook is a small program that runs at a set moment, like just before a shell command. If it exits with code 2, the command is blocked and your message goes back to Claude. In 2.1.309, hooks run in PowerShell now block on exit code 2 too. In 2.1.310, Windows hooks no longer let a call through when Git Bash is missing.</div></div>
+    <div class="row"><b>Why</b><div>One safety rule, enforced the same way on every machine.</div></div>
+    <div class="row"><b>Needs</b><div>Version 2.1.309 or later for the PowerShell fix. <code>jq</code> for the script below.</div></div>
+    <div class="path">.claude/hooks/no-rm.sh (the docs' example; make it executable)</div>
+    <div class="codebox"><pre>#!/bin/bash
+input=$(cat)
+command=$(jq -r '.tool_input.command' &lt;&lt;&lt;"$input")
+
+if [[ "$command" == rm* ]]; then
+  echo "Blocked: rm commands are not allowed" &gt;&amp;2
+  exit 2
+fi
+
+exit 0</pre></div>
+    <div class="path">.claude/settings.json (this wiring is my sketch; check it against the hooks page)</div>
+    <div class="codebox"><pre>{
   "hooks": {
     "PreToolUse": [
       {
         "matcher": "Bash",
         "hooks": [
-          {
-            "type": "command",
-            "command": "node",
-            "args": ["${CLAUDE_PROJECT_DIR}/.claude/hooks/check-command.js"],
-            "onFailure": "block"
-          }
+          { "type": "command", "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/no-rm.sh" }
         ]
       }
     ]
   }
 }</pre></div>
-<div class="check"><b>Did it work?</b> Rename the script for a minute and ask Claude to run a shell command. I expect the call to be blocked. Rename it back after.</div>
-</article>
-<article class="feature" id="f4">
-<div class="fhead"><div class="icon"><svg><use href="#i-box"/></svg></div><div><div class="cat">Packaging <span class="tag miss">EASY TO MISS</span></div><h3>One command installs a whole toolkit</h3></div></div>
-<p class="hook">Onboarding a new teammate takes six installs?</p>
-<div class="badges"><span class="badge"><b>Time</b> 15 min</span><span class="badge"><b>Level</b> intermediate</span><span class="badge"><b>For</b> team leads, plugin authors</span></div>
-<div class="row"><b>What</b><div>A plugin can list other plugins it needs. These are called dependencies. A plugin with only a name and a list is valid, so you can build a "starter pack" for your team.</div></div>
-<div class="row"><b>Why</b><div>A new teammate runs one command, not six.</div></div>
-<div class="row"><b>Needs</b><div>The docs page names no minimum version.</div></div>
-<div class="path">.claude-plugin/plugin.json (names are the docs' examples; use plugins from your store)</div>
-<div class="codebox"><pre>{
-  "name": "backend-standard",
-  "version": "1.0.0",
-  "description": "Standard plugin set for backend engineers",
+    <div class="check"><b>Did it work?</b> Ask Claude to run <code>rm</code> on a throwaway file. It should be refused and show your "Blocked" message.</div>
+  </article>
+
+  <article class="feature" id="f2">
+    <div class="fhead"><div class="icon"><svg><use href="#i-bolt"/></svg></div>
+      <div><div class="cat">Skills <span class="tag new">NEW · v2.1.309</span></div><h3>Two skills, same name, no clash</h3></div></div>
+    <p class="hook">What if your project and a shared folder both have a <code>verify</code> skill?</p>
+    <div class="badges"><span class="badge"><b>Time</b> 5 min</span><span class="badge"><b>Level</b> beginner</span><span class="badge"><b>For</b> monorepo teams</span></div>
+    <div class="row"><b>What</b><div>A skill is a saved set of instructions Claude follows. <code>--add-dir</code> lets a session use another folder. Before 2.1.309, a skill there could not be reached if another skill held its name. Now it gets the folder name as a prefix.</div></div>
+    <div class="row"><b>Why</b><div>You can use both skills without renaming either one.</div></div>
+    <div class="row"><b>Needs</b><div>Version 2.1.309 or later. A <code>verify</code> skill in your project and one in <code>../cli</code>.</div></div>
+    <div class="path">In your shell:</div>
+    <div class="codebox"><pre>claude --add-dir ../cli</pre></div>
+    <div class="path">Then, in the session:</div>
+    <div class="codebox"><pre>/verify       # your project's skill
+/cli:verify   # the skill from ../cli</pre></div>
+    <div class="check"><b>Did it work?</b> Type <code>/</code> and look for both <code>verify</code> and <code>cli:verify</code>.</div>
+  </article>
+
+  <article class="feature" id="f3">
+    <div class="fhead"><div class="icon"><svg><use href="#i-shield"/></svg></div>
+      <div><div class="cat">Skills <span class="tag new">FIXED · v2.1.309</span></div><h3>Run a setup step once</h3></div></div>
+    <p class="hook">Want a skill to check something the first time it runs, and never again?</p>
+    <div class="badges"><span class="badge"><b>Time</b> 10 min</span><span class="badge"><b>Level</b> intermediate</span><span class="badge"><b>For</b> skill authors</span></div>
+    <div class="row"><b>What</b><div>A skill can carry its own hooks. Add <code>once: true</code> and Claude Code removes the hook after its first successful run. A failed run keeps it, so it tries again. The 2.1.309 fix: one skill's <code>once</code> hook no longer removes another skill's identical hook.</div></div>
+    <div class="row"><b>Why</b><div>A one-time check, with no extra noise after it.</div></div>
+    <div class="row"><b>Needs</b><div>Version 2.1.309 or later. <code>once</code> only works in skill files, not in settings files.</div></div>
+    <div class="path">.claude/skills/secure-operations/SKILL.md (the docs' example, with <code>once</code> added)</div>
+    <div class="codebox"><pre>---
+name: secure-operations
+description: Perform operations with security checks
+hooks:
+  PreToolUse:
+    - matcher: "Bash"
+      hooks:
+        - type: command
+          command: "./scripts/security-check.sh"
+          once: true
+---</pre></div>
+    <div class="check"><b>Did it work?</b> Run the skill and a shell command twice. The check should run on the first one only.</div>
+  </article>
+
+  <article class="feature" id="f4">
+    <div class="fhead"><div class="icon"><svg><use href="#i-box"/></svg></div>
+      <div><div class="cat">Plugins <span class="tag miss">FROM THE DOCS</span></div><h3>Pin the plugins you depend on</h3></div></div>
+    <p class="hook">What if a plugin you rely on ships a change that breaks yours?</p>
+    <div class="badges"><span class="badge"><b>Time</b> 15 min</span><span class="badge"><b>Level</b> intermediate</span><span class="badge"><b>For</b> plugin authors</span></div>
+    <div class="row"><b>What</b><div>A plugin can list other plugins it needs. Add a version range, like <code>~2.1.0</code>, and users stay on <code>2.1.x</code> of that dependency. A plugin with only a name and a list works as a team starter pack. To tag a release so ranges can find it, run <code>claude plugin tag --push</code>.</div></div>
+    <div class="row"><b>Why</b><div>Your plugin does not break the day a dependency changes.</div></div>
+    <div class="row"><b>Needs</b><div>The docs page names no minimum version. Ranges resolve against git tags named <code>name--vX.Y.Z</code>.</div></div>
+    <div class="path">.claude-plugin/plugin.json (the docs' example names)</div>
+    <div class="codebox"><pre>{
+  "name": "deploy-kit",
+  "version": "3.1.0",
   "dependencies": [
-    "secrets-vault",
-    "deploy-kit",
-    { "name": "db-migrate", "version": "^3.0" },
-    "oncall-runbook"
+    "audit-logger",
+    { "name": "secrets-vault", "version": "~2.1.0" }
   ]
 }</pre></div>
-<div class="path">Install it:</div>
-<div class="codebox"><pre>claude plugin install backend-standard@your-marketplace</pre></div>
-<div class="check"><b>Did it work?</b> Run <code>claude plugin list</code> in your terminal and look for the other plugins.</div>
-</article>
-<article class="feature" id="f5">
-<div class="fhead"><div class="icon"><svg><use href="#i-flask"/></svg></div><div><div class="cat">Testing <span class="tag miss">EASY TO MISS · v2.1.269</span></div><h3>Give your plugin a report card</h3></div></div>
-<p class="hook">How do you know a plugin change did not make things worse?</p>
-<div class="badges"><span class="badge"><b>Time</b> 20 min</span><span class="badge"><b>Level</b> advanced</span><span class="badge"><b>For</b> plugin authors</span></div>
-<div class="row"><b>What</b><div><code>claude plugin eval</code> runs sample requests against your plugin and scores the answers. It also runs them without your plugin, so you see what the plugin adds. Each case runs three times by default.</div></div>
-<div class="row"><b>Why</b><div>You learn if a change made things worse before your users do.</div></div>
-<div class="row"><b>Needs</b><div>Version 2.1.269 or later. It uses your model credits, so start small.</div></div>
-<div class="path">In your plugin folder: make a blank test case, then run the suite</div>
-<div class="codebox"><pre>claude plugin eval init --bare first-case
+    <div class="path">In the dependency's folder, to tag a release:</div>
+    <div class="codebox"><pre>claude plugin tag --push</pre></div>
+    <div class="check"><b>Did it work?</b> It prints <code>Created tag</code> and <code>Pushed to origin</code>. Add <code>--dry-run</code> first to see the plan.</div>
+  </article>
+
+  <article class="feature" id="f5">
+    <div class="fhead"><div class="icon"><svg><use href="#i-flask"/></svg></div>
+      <div><div class="cat">Testing <span class="tag miss">FROM THE DOCS · v2.1.269</span></div><h3>Give your plugin a report card</h3></div></div>
+    <p class="hook">How do you know a plugin change did not make things worse?</p>
+    <div class="badges"><span class="badge"><b>Time</b> 20 min</span><span class="badge"><b>Level</b> advanced</span><span class="badge"><b>For</b> plugin authors</span></div>
+    <div class="row"><b>What</b><div><code>claude plugin eval</code> runs sample requests against your plugin and scores the answers. It also runs them without your plugin, so you see what the plugin adds.</div></div>
+    <div class="row"><b>Why</b><div>You learn if a change made things worse before your users do.</div></div>
+    <div class="row"><b>Needs</b><div>Version 2.1.269 or later. It uses your model credits, so start small.</div></div>
+    <div class="path">In your plugin folder: make a blank test case, then run the suite</div>
+    <div class="codebox"><pre>claude plugin eval init --bare first-case
 claude plugin eval .</pre></div>
-<div class="path">To fail a CI job when a score is low (from the docs):</div>
-<div class="codebox"><pre>claude plugin eval . --trust-plugin --json results.json --threshold 0.8</pre></div>
-<div class="check"><b>Did it work?</b> You get a table with a score for each case, plus a <code>report.html</code> file.</div>
-</article>
-<section class="band"><h2>How to install a plugin</h2>
-<p>Official store plugins use this form, shown in Anthropic's docs:</p>
-<div class="codebox"><pre>/plugin install commit-commands@claude-plugins-official</pre></div>
-<p class="fine">To add another store first, run <code>/plugin marketplace add &lt;owner&gt;/&lt;repo&gt;</code>. Then use <code>/plugin install &lt;plugin&gt;@&lt;marketplace-name&gt;</code>.</p></section>
-<section class="band safe"><h2>Stay safe</h2><p style="margin:0">Plugins can run code on your machine. Read what a plugin adds before you install it.</p></section>
-<section class="ask"><h2>Which of these would save <em>your team</em> the most time?</h2><p class="blurb">Tell me in the comments on LinkedIn.</p></section>
-<section class="fine">
-<p>Time and level badges are my own estimates, not from the docs. I did not run these snippets myself. They come from Anthropic's Claude Code docs and changelog.</p>
-<b>Sources</b>
-<ul class="src">
-<li><a href="https://code.claude.com/docs/en/changelog">Claude Code changelog</a></li>
-<li><a href="https://code.claude.com/docs/en/hooks">Hooks reference</a></li>
-<li><a href="https://code.claude.com/docs/en/skills">Extend Claude with skills</a></li>
-<li><a href="https://code.claude.com/docs/en/plugins/dependencies.md">Plugin dependencies</a></li>
-<li><a href="https://code.claude.com/docs/en/plugin-evals.md">Test plugins with evals</a></li>
-</ul>
-</section>
+    <div class="path">To fail a CI job when a score is low:</div>
+    <div class="codebox"><pre>claude plugin eval . --trust-plugin --json results.json --threshold 0.8</pre></div>
+    <div class="check"><b>Did it work?</b> You get a table with a score for each case, plus a <code>report.html</code> file.</div>
+  </article>
+
+  <section class="band">
+    <h2>Also fixed in 2.1.311</h2>
+    <ul class="src">
+      <li><code>SubagentStop</code> hooks ran about twice a minute per subagent. They now run once, when it finishes.</li>
+      <li>A skill that runs in a sub-agent no longer runs a second time when a cloud or background session restarts.</li>
+      <li>A <code>--plugin-dir</code> folder of plugins no longer loads as one plugin because of an empty <code>.mcp.json</code>.</li>
+      <li>Subagents can use MCP tools from servers that finish connecting late.</li>
+    </ul>
+  </section>
+
+  <section class="band">
+    <h2>How to install a plugin</h2>
+    <p>Official store plugins use this form, shown in Anthropic's docs:</p>
+    <div class="codebox"><pre>/plugin install commit-commands@claude-plugins-official</pre></div>
+    <p class="fine">To add another store first, run <code>/plugin marketplace add &lt;owner&gt;/&lt;repo&gt;</code>. Then use <code>/plugin install &lt;plugin&gt;@&lt;marketplace-name&gt;</code>.</p>
+  </section>
+
+  <section class="band safe">
+    <h2>Stay safe</h2>
+    <p style="margin:0">Plugins and hooks run code on your machine. Read what they do before you install or enable them.</p>
+  </section>
+
+  <section class="ask">
+    <h2>Which of these would save <em>your team</em> the most time?</h2>
+    <p class="blurb">Tell me in the comments.</p>
+  </section>
+
+  <section class="fine">
+    <p>Time and level badges are my own estimates, not from the docs. I did not run these snippets myself. They come from Anthropic's Claude Code changelog and docs.</p>
+    <b>Sources</b>
+    <ul class="src">
+      <li><a href="https://code.claude.com/docs/en/changelog">Claude Code changelog (2.1.309 to 2.1.311)</a></li>
+      <li><a href="https://code.claude.com/docs/en/hooks">Hooks reference</a></li>
+      <li><a href="https://code.claude.com/docs/en/skills">Extend Claude with skills</a></li>
+      <li><a href="https://code.claude.com/docs/en/plugins/dependencies.md">Plugin dependencies</a></li>
+      <li><a href="https://code.claude.com/docs/en/plugin-evals.md">Test plugins with evals</a></li>
+    </ul>
+  </section>
 </div>
+
+
 <script>
 function sel(el){var r=document.createRange();r.selectNodeContents(el);var s=getSelection();s.removeAllRanges();s.addRange(r)}
-function wire(b,getText,getEl){b.addEventListener('click',function(){function done(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1500)}function fb(){sel(getEl());b.textContent='Selected'}try{navigator.clipboard.writeText(getText()).then(done,fb)}catch(e){fb()}})}
-document.querySelectorAll('.codebox').forEach(function(box){var pre=box.querySelector('pre');if(!pre)return;var b=document.createElement('button');b.className='copy';b.type='button';b.textContent='Copy';wire(b,function(){return pre.innerText},function(){return pre});box.appendChild(b)});
-document.querySelectorAll('button.copy[data-t]').forEach(function(b){wire(b,function(){return b.getAttribute('data-t')},function(){return b.previousElementSibling})});
+function wire(b,getText,getEl){
+  b.addEventListener('click',function(){
+    function done(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy'},1500)}
+    function fb(){sel(getEl());b.textContent='Selected'}
+    try{navigator.clipboard.writeText(getText()).then(done,fb)}catch(e){fb()}
+  });
+}
+document.querySelectorAll('.codebox').forEach(function(box){
+  var pre=box.querySelector('pre');if(!pre)return;
+  var b=document.createElement('button');b.className='copy';b.type='button';b.textContent='Copy';
+  wire(b,function(){return pre.innerText},function(){return pre});box.appendChild(b);
+});
+document.querySelectorAll('button.copy[data-t]').forEach(function(b){
+  wire(b,function(){return b.getAttribute('data-t')},function(){return b.previousElementSibling});
+});
 </script>
-</body>
-</html>
+
+</body></html>
