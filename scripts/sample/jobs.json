@@ -1,0 +1,4 @@
+[
+  {"html": "test.html", "out": "scripts/sample/out/test-cover.png", "width": 1200, "height": 627},
+  {"html": "test.html", "out": "scripts/sample/out/test-banner.png", "width": 1200, "height": 360}
+]
