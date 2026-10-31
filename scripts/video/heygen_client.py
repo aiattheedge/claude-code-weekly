@@ -56,10 +56,14 @@ class HeyGenClient:
         raise HeyGenError(f"{method} {path} failed after retries.")
 
     def list_twin_looks(self):
+        return self.list_looks(avatar_type="digital_twin")
+
+    def list_looks(self, avatar_type: str = None):
+        """List the account's private looks, optionally of one avatar type."""
         looks, token = [], None
         while True:
             page = self._request("GET", "/v3/avatars/looks", query={
-                "avatar_type": "digital_twin", "ownership": "private", "limit": 50, "token": token})
+                "avatar_type": avatar_type, "ownership": "private", "limit": 50, "token": token})
             looks.extend(page.get("data") or [])
             token = page.get("next_token")
             if not page.get("has_more") or not token:

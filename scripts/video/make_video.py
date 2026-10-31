@@ -51,8 +51,8 @@ def choose_look(looks: list, *, engine: str, avatar_id: str = "", avatar_name: s
     if avatar_id:
         match = next((l for l in looks if l.get("id") == avatar_id), None)
         if not match:
-            raise HeyGenError(f"No private digital twin look has id {avatar_id}. Looks found: "
-                              f"{[(l.get('name'), l.get('id'), l.get('supported_api_engines')) for l in looks]}.")
+            raise HeyGenError(f"No private look has id {avatar_id}. Looks found: "
+                              f"{[(l.get('name'), l.get('id'), l.get('avatar_type'), l.get('supported_api_engines')) for l in looks]}.")
         candidates = [match]
     else:
         finished = [l for l in looks if l.get("status") not in ("processing", "failed")]
@@ -134,12 +134,16 @@ def main(argv=None) -> int:
         return 0
 
     client = HeyGenClient(api_key)
-    look = choose_look(client.list_twin_looks(), engine=settings["engine"],
+    # A pinned look id may be a generated look (new outfit or setting), which HeyGen lists outside
+    # the digital twin type, so search every private look for it.
+    looks = client.list_looks() if settings.get("avatar_id") else client.list_twin_looks()
+    look = choose_look(looks, engine=settings["engine"],
                        avatar_id=settings.get("avatar_id", ""), avatar_name=settings.get("avatar_name", ""))
     voice_id = settings.get("voice_id") or look.get("default_voice_id")
     if not voice_id:
         raise HeyGenError("The look has no default voice. Set voice_id in video/config.json or HEYGEN_VOICE_ID.")
-    summary.append(f"- Look: {look.get('name')} (`{look.get('id')}`), voice `{voice_id}`")
+    summary.append(f"- Look: {look.get('name')} (`{look.get('id')}`, {look.get('avatar_type')}, "
+                   f"engines {look.get('supported_api_engines')}), voice `{voice_id}`")
     if args.dry_run:
         write_summary(summary + ["- Dry run: nothing was rendered or charged."])
         return 0
