@@ -54,10 +54,14 @@ def choose_look(looks: list, *, engine: str, avatar_id: str = "", avatar_name: s
             raise HeyGenError(f"No private digital twin look has id {avatar_id}.")
         candidates = [match]
     else:
-        candidates = [l for l in looks if l.get("status") not in ("processing", "failed")]
+        finished = [l for l in looks if l.get("status") not in ("processing", "failed")]
+        candidates = finished
         if avatar_name:
-            candidates = [l for l in candidates if avatar_name.lower() in (l.get("name") or "").lower()]
+            candidates = [l for l in finished if avatar_name.lower() in (l.get("name") or "").lower()]
         if not candidates:
+            if avatar_name and finished:
+                raise HeyGenError(f"No finished look is named like {avatar_name!r}. "
+                                  f"Looks found: {[l.get('name') for l in finished]}.")
             raise HeyGenError("No finished private digital twin look found. Create the twin in HeyGen first.")
     for look in candidates:
         engines = look.get("supported_api_engines")

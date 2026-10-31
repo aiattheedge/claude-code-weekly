@@ -73,6 +73,10 @@ class LookTests(unittest.TestCase):
         with self.assertRaises(heygen_client.HeyGenError):
             make_video.choose_look(self.LOOKS, engine="avatar_v", avatar_id="b")
 
+    def test_unknown_name_lists_looks(self):
+        with self.assertRaisesRegex(heygen_client.HeyGenError, "Ian studio"):
+            make_video.choose_look(self.LOOKS, engine="avatar_v", avatar_name="beach")
+
     def test_none(self):
         with self.assertRaises(heygen_client.HeyGenError):
             make_video.choose_look([], engine="avatar_v")
@@ -117,7 +121,8 @@ class EndToEndTests(unittest.TestCase):
                 log.append(("GET", self.path, self.headers.get("x-api-key")))
                 base = f"http://127.0.0.1:{self.server.server_port}"
                 if self.path.startswith("/v3/avatars/looks"):
-                    self._json({"data": [{"id": "look1", "name": "Ian", "status": "completed",
+                    name = make_video.load_config()["heygen"].get("avatar_name") or "Ian"
+                    self._json({"data": [{"id": "look1", "name": name, "status": "completed",
                                           "default_voice_id": "voice1",
                                           "supported_api_engines": ["avatar_iv", "avatar_v"]}],
                                 "has_more": False})
