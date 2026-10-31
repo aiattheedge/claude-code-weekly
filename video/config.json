@@ -1,0 +1,29 @@
+{
+  "heygen": {
+    "avatar_id": "",
+    "avatar_name": "",
+    "voice_id": "",
+    "engine": "avatar_v",
+    "resolution": "1080p",
+    "aspect_ratio": "auto"
+  },
+  "limits": {
+    "max_words": 900,
+    "words_per_minute": 150,
+    "price_per_minute_usd": { "avatar_iii": 0.60, "avatar_iv": 4.83, "avatar_v": 7.20 },
+    "poll_seconds": 20,
+    "poll_timeout_minutes": 100
+  },
+  "disclosure": {
+    "require_ai_in_first_words": 40,
+    "label_text": "AI-generated"
+  },
+  "end_card": {
+    "seconds": 5,
+    "lines": [
+      "Claude Code Latest",
+      "This video is AI-generated from my own script.",
+      "Read the full issue: aiattheedge.github.io/claude-code-weekly"
+    ]
+  }
+}

@@ -1,0 +1,109 @@
+name: Render video
+# Turns a spoken script into a HeyGen video of Ian with captions, an AI label and an end card.
+# Runs only when a script is pushed to main or someone starts it by hand. Never on a schedule.
+on:
+  push:
+    branches: [main]
+    paths: ["video/script-*.md"]
+  workflow_dispatch:
+    inputs:
+      script:
+        description: "Script path, e.g. video/script-2026-11-02.md (blank = newest)"
+        required: false
+        default: ""
+      mode:
+        description: "dry-run is free (checks the script, finds the twin, estimates cost). render spends HeyGen credits."
+        type: choice
+        options: [dry-run, render]
+        default: dry-run
+permissions:
+  contents: write
+concurrency:
+  group: render-video
+  cancel-in-progress: false
+jobs:
+  video:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 130
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Pick script
+        id: pick
+        env:
+          EVENT: ${{ github.event_name }}
+          BEFORE: ${{ github.event.before }}
+          INPUT_SCRIPT: ${{ inputs.script }}
+          INPUT_MODE: ${{ inputs.mode }}
+        run: |
+          set -euo pipefail
+          pattern='^video/script-[0-9]{4}-[0-9]{2}-[0-9]{2}\.md$'
+          if [ "$EVENT" = "push" ]; then
+            mode=render
+            if [ -z "${BEFORE:-}" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+              files=$(git show --name-only --diff-filter=AM --pretty=format: HEAD | grep -E "$pattern" || true)
+            else
+              files=$(git diff --name-only --diff-filter=AM "$BEFORE" "$GITHUB_SHA" | grep -E "$pattern" || true)
+            fi
+          else
+            mode="${INPUT_MODE:-dry-run}"
+            files="${INPUT_SCRIPT:-}"
+            if [ -z "$files" ]; then files=$(ls video/script-*.md 2>/dev/null | sort | tail -n 1 || true); fi
+          fi
+          count=$(printf '%s\n' "$files" | grep -c . || true)
+          if [ "$count" -eq 0 ]; then echo "::error::No video/script-YYYY-MM-DD.md to render."; exit 1; fi
+          if [ "$count" -gt 1 ]; then echo "::error::More than one script changed. Start each one with Run workflow."; exit 1; fi
+          if ! printf '%s' "$files" | grep -Eq "$pattern" || [ ! -f "$files" ]; then
+            echo "::error::Script must be an existing file named video/script-YYYY-MM-DD.md"; exit 1
+          fi
+          date=$(basename "$files" .md); date=${date#script-}
+          { echo "script=$files"; echo "mode=$mode"; echo "date=$date"; } >> "$GITHUB_OUTPUT"
+          echo "Script: $files, mode: $mode"
+
+      - name: Install ffmpeg and fonts
+        if: steps.pick.outputs.mode == 'render'
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q --no-install-recommends ffmpeg fonts-dejavu-core
+
+      - name: Unit tests
+        run: python3 -m unittest discover -s tests -v
+
+      - name: Make video
+        env:
+          HEYGEN_API_KEY: ${{ secrets.HEYGEN_API_KEY }}
+          HEYGEN_AVATAR_ID: ${{ vars.HEYGEN_AVATAR_ID }}
+          HEYGEN_VOICE_ID: ${{ vars.HEYGEN_VOICE_ID }}
+          VIDEO_BLOCKED_TERMS: ${{ secrets.VIDEO_BLOCKED_TERMS }}
+          VIDEO_OUT_DIR: ${{ runner.temp }}/video
+          SCRIPT: ${{ steps.pick.outputs.script }}
+          MODE: ${{ steps.pick.outputs.mode }}
+        run: |
+          if [ "$MODE" = "render" ]; then
+            python3 scripts/video/make_video.py "$SCRIPT"
+          else
+            python3 scripts/video/make_video.py "$SCRIPT" --dry-run
+          fi
+
+      - name: Keep video as run artifact
+        if: steps.pick.outputs.mode == 'render'
+        uses: actions/upload-artifact@v4
+        with:
+          name: video-${{ steps.pick.outputs.date }}
+          path: ${{ runner.temp }}/video/${{ steps.pick.outputs.date }}/
+          retention-days: 30
+
+      - name: Save video to a draft release
+        if: steps.pick.outputs.mode == 'render'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DATE: ${{ steps.pick.outputs.date }}
+          SCRIPT: ${{ steps.pick.outputs.script }}
+        run: |
+          dir="$RUNNER_TEMP/video/$DATE"
+          printf 'AI-generated video for Claude Code Latest, %s.\n\nScript: %s\nDraft release: only repo members can see it. Download the MP4, review it, then post it with a first line saying it is AI-generated.\n' "$DATE" "$SCRIPT" > "$dir/notes.md"
+          gh release create "video-$DATE-run$GITHUB_RUN_NUMBER" --draft \
+            --title "Video $DATE" --notes-file "$dir/notes.md" \
+            "$dir/claude-code-latest-$DATE.mp4" "$dir/captions.srt" "$dir/render.json"
