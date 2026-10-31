@@ -95,15 +95,29 @@ jobs:
           path: ${{ runner.temp }}/video/${{ steps.pick.outputs.date }}/
           retention-days: 30
 
-      - name: Save video to a draft release
+      - name: Save video to the issue's release
+        # One release per issue, tagged with the issue date (e.g. 2026-11-02). The release stays a
+        # draft (only repo members see it) until Ian publishes it. Re-running a date replaces the assets.
         if: steps.pick.outputs.mode == 'render'
         env:
           GH_TOKEN: ${{ github.token }}
           DATE: ${{ steps.pick.outputs.date }}
           SCRIPT: ${{ steps.pick.outputs.script }}
         run: |
+          set -euo pipefail
           dir="$RUNNER_TEMP/video/$DATE"
-          printf 'AI-generated video for Claude Code Latest, %s.\n\nScript: %s\nDraft release: only repo members can see it. Download the MP4, review it, then post it with a first line saying it is AI-generated.\n' "$DATE" "$SCRIPT" > "$dir/notes.md"
-          gh release create "video-$DATE-run$GITHUB_RUN_NUMBER" --draft \
-            --title "Video $DATE" --notes-file "$dir/notes.md" \
-            "$dir/claude-code-latest-$DATE.mp4" "$dir/captions.srt" "$dir/render.json"
+          assets=("$dir/claude-code-latest-$DATE.mp4" "$dir/captions.srt" "$dir/render.json")
+          if gh release view "$DATE" >/dev/null 2>&1; then
+            gh release upload "$DATE" "${assets[@]}" --clobber
+            echo "Replaced the video on release $DATE"
+          else
+            if ! git rev-parse -q --verify "refs/tags/$DATE" >/dev/null; then
+              git tag "$DATE" "$GITHUB_SHA"
+              git push origin "refs/tags/$DATE"
+            fi
+            printf 'AI-generated video for Claude Code Latest, %s.\n\nScript: %s\n\nThis release is a draft until published. Download the MP4, review it, then post it with a first line saying it is AI-generated.\n' "$DATE" "$SCRIPT" > "$dir/notes.md"
+            gh release create "$DATE" --draft --verify-tag --title "Claude Code Latest $DATE video" \
+              --notes-file "$dir/notes.md" "${assets[@]}"
+            echo "Created draft release $DATE"
+          fi
+          echo "- Release: \`$DATE\` (draft until published)" >> "$GITHUB_STEP_SUMMARY"

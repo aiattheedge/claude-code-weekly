@@ -26,8 +26,11 @@ Each week's issue can ship with a short video of Ian presenting it. The video is
 3. It polls `GET /v3/videos/{id}` until the render is done, downloads the MP4 and HeyGen's SRT
    captions, then uses ffmpeg to burn in the captions, add an "AI-generated" label and append
    a 5 second end card.
-4. The finished MP4, captions and `render.json` are saved as a **draft release** (only repo
-   members can see drafts) and as a run artifact kept for 30 days.
+4. The finished MP4, captions and `render.json` are uploaded as assets to that issue's
+   GitHub release, tagged with the issue date (for example `2026-11-02`). Videos are never
+   committed to git. The release is created as a **draft** (only repo members can see it)
+   until Ian publishes it. Re-rendering a date replaces the release's assets. A copy is also
+   kept as a run artifact for 30 days.
 5. Ian downloads it, watches it, and posts it himself with a first line saying it's AI-generated.
 
 The workflow never runs on a schedule. It runs only on a script push to `main` or when started
