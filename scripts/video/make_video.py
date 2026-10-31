@@ -51,7 +51,8 @@ def choose_look(looks: list, *, engine: str, avatar_id: str = "", avatar_name: s
     if avatar_id:
         match = next((l for l in looks if l.get("id") == avatar_id), None)
         if not match:
-            raise HeyGenError(f"No private digital twin look has id {avatar_id}.")
+            raise HeyGenError(f"No private digital twin look has id {avatar_id}. Looks found: "
+                              f"{[(l.get('name'), l.get('id'), l.get('supported_api_engines')) for l in looks]}.")
         candidates = [match]
     else:
         finished = [l for l in looks if l.get("status") not in ("processing", "failed")]

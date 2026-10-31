@@ -121,8 +121,7 @@ class EndToEndTests(unittest.TestCase):
                 log.append(("GET", self.path, self.headers.get("x-api-key")))
                 base = f"http://127.0.0.1:{self.server.server_port}"
                 if self.path.startswith("/v3/avatars/looks"):
-                    name = make_video.load_config()["heygen"].get("avatar_name") or "Ian"
-                    self._json({"data": [{"id": "look1", "name": name, "status": "completed",
+                    self._json({"data": [{"id": "look1", "name": "Ian", "status": "completed",
                                           "default_voice_id": "voice1",
                                           "supported_api_engines": ["avatar_iv", "avatar_v"]}],
                                 "has_more": False})
@@ -155,7 +154,11 @@ class EndToEndTests(unittest.TestCase):
 
     def _run(self, *args):
         env = {"HEYGEN_API_KEY": "test-key", "VIDEO_OUT_DIR": self.tmp}
-        with mock.patch.dict(os.environ, env), mock.patch.object(heygen_client, "BASE_URL", self.base):
+        # Use the real config, minus the chosen look, so these tests don't depend on Ian's HeyGen account.
+        config = make_video.load_config()
+        config["heygen"].update(avatar_id="", avatar_name="")
+        with mock.patch.dict(os.environ, env), mock.patch.object(heygen_client, "BASE_URL", self.base), \
+                mock.patch.object(make_video, "load_config", return_value=config):
             return make_video.main([SAMPLE, *args])
 
     def test_dry_run_never_creates_a_video(self):
