@@ -81,8 +81,15 @@ def estimate(script: script_file.Script, config: dict, engine: str) -> dict:
             "cost_usd": round(minutes * price, 2) if price is not None else None}
 
 
+def _is_true(value) -> bool:
+    return value is True or str(value).strip().lower() in ("true", "yes", "1")
+
+
 def build_payload(script: script_file.Script, settings: dict, look_id: str, voice_id: str) -> dict:
-    return {
+    engine = {"type": settings["engine"]}
+    if _is_true(settings.get("more_blinking")):
+        engine["more_blinking"] = True
+    payload = {
         "type": "avatar",
         "avatar_id": look_id,
         "voice_id": voice_id,
@@ -90,9 +97,13 @@ def build_payload(script: script_file.Script, settings: dict, look_id: str, voic
         "title": f"{script.date} {script.title}",
         "resolution": settings["resolution"],
         "aspect_ratio": settings["aspect_ratio"],
-        "engine": {"type": settings["engine"]},
+        "engine": engine,
         "caption": {"file_format": "srt"},
     }
+    # Avatar V only: natural-language direction for body motion and hand gestures.
+    if settings.get("motion_prompt"):
+        payload["motion_prompt"] = settings["motion_prompt"]
+    return payload
 
 
 def idempotency_key(payload: dict) -> str:

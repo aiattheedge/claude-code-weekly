@@ -5,7 +5,9 @@
     "voice_id": "",
     "engine": "avatar_v",
     "resolution": "1080p",
-    "aspect_ratio": "auto"
+    "aspect_ratio": "auto",
+    "motion_prompt": "",
+    "more_blinking": false
   },
   "limits": {
     "max_words": 900,

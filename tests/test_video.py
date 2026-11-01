@@ -60,6 +60,22 @@ class ScriptFileTests(unittest.TestCase):
         self.assertTrue(500 <= s.word_count <= 700, s.word_count)
 
 
+class PayloadTests(unittest.TestCase):
+    SCRIPT = script_file.Script(title="T", date="2026-11-02", spoken_text="This is an AI video.", overrides={})
+    BASE = {"engine": "avatar_v", "resolution": "1080p", "aspect_ratio": "auto"}
+
+    def test_defaults_add_no_motion_fields(self):
+        payload = make_video.build_payload(self.SCRIPT, dict(self.BASE, motion_prompt="", more_blinking=False), "l", "v")
+        self.assertEqual(payload["engine"], {"type": "avatar_v"})
+        self.assertNotIn("motion_prompt", payload)
+
+    def test_motion_prompt_and_blinking(self):
+        settings = dict(self.BASE, motion_prompt="Nods while talking", more_blinking="true")
+        payload = make_video.build_payload(self.SCRIPT, settings, "l", "v")
+        self.assertEqual(payload["engine"], {"type": "avatar_v", "more_blinking": True})
+        self.assertEqual(payload["motion_prompt"], "Nods while talking")
+
+
 class LookTests(unittest.TestCase):
     LOOKS = [{"id": "a", "name": "Old", "status": "failed", "supported_api_engines": ["avatar_v"]},
              {"id": "b", "name": "Ian office", "status": "completed", "supported_api_engines": ["avatar_iv"]},

@@ -9,14 +9,14 @@ Format:
     spoken. HTML comments (<!-- ... -->) are notes and are not spoken.
 
 Optional front-matter keys override video/config.json for this video:
-engine, aspect_ratio, resolution, avatar_id, voice_id.
+engine, aspect_ratio, resolution, avatar_id, voice_id, motion_prompt, more_blinking.
 """
 import dataclasses
 import datetime
 import re
 
 REQUIRED_KEYS = ("title", "date")
-OVERRIDE_KEYS = ("engine", "aspect_ratio", "resolution", "avatar_id", "voice_id")
+OVERRIDE_KEYS = ("engine", "aspect_ratio", "resolution", "avatar_id", "voice_id", "motion_prompt", "more_blinking")
 
 
 class ScriptError(ValueError):
