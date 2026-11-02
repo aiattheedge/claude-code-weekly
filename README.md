@@ -77,6 +77,25 @@ Quick note before we start. This is an AI-generated video. ...
 - See `video/samples/script-2026-11-02-duet.md` for a full example. Files under
   `video/samples/` never start a render.
 
+### Slides beside the twin
+
+When `video/slides/YYYY-MM-DD/slides.json` exists for the script's date, the video puts the
+twin small in the bottom-right corner and fills the rest of the screen with slides:
+
+- `slides.json` lists one slide per script section, in order:
+  `{"section": "Hook", "html": "slide-01.html", "png": "out/slides/YYYY-MM-DD/slide-01.png"}`.
+  `section` must match a `# Label` in the script, and the first slide's section must be
+  where speaking starts.
+- `jobs.json` in the same folder tells `scripts/render.js` to draw each HTML slide at 1920x1080.
+  The workflow renders them before calling HeyGen, and the run stops before paying if any
+  slide image is missing or a slide doesn't match the script.
+- A slide switches on when the twin starts its section, timed from HeyGen's captions.
+- Keep slide content clear of the bottom-right corner (about 640x380 px) and the bottom
+  strip, where the twin and captions sit.
+
+HeyGen still renders only the twin, so slides don't change the cost. Without a
+`slides.json` the twin fills the frame as before.
+
 ### Cost
 
 HeyGen API pricing at the time of writing is per rendered minute: Avatar III $0.60,
@@ -102,6 +121,7 @@ same script within 24 hours reuses the same HeyGen video (the request carries an
 | `limits.poll_timeout_minutes` | 100 | How long to wait for HeyGen |
 | `disclosure.label_text` | `AI-generated` | On-screen label |
 | `end_card.lines` | see file | End card text; first line is the title |
+| `layout.twin_width` / `twin_max_height` / `margin_px` | `0.30` / `0.50` / `40` | Twin size and corner margin when a video has slides |
 
 ### Running locally
 

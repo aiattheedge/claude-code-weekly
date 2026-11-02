@@ -8,6 +8,9 @@ Format:
     Spoken paragraphs. Lines starting with # are section labels and are not
     spoken. HTML comments (<!-- ... -->) are notes and are not spoken.
 
+Each "# Label" line also starts a section. Slides (video/slides/<date>/slides.json)
+switch at section starts, so a label names the slide that shows while it is spoken.
+
 Optional front-matter keys override video/config.json for this video:
 engine, aspect_ratio, resolution, avatar_id, voice_id, motion_prompt, more_blinking.
 """
@@ -29,6 +32,7 @@ class Script:
     date: str
     spoken_text: str
     overrides: dict
+    sections: tuple = ()  # (label, index of the first spoken word after the label)
 
     @property
     def word_count(self) -> int:
@@ -56,10 +60,11 @@ def parse(text: str) -> Script:
         raise ScriptError(f"date must be YYYY-MM-DD, got {meta['date']!r}") from err
 
     body = re.sub(r"<!--.*?-->", "", match.group(2), flags=re.S)
-    paragraphs, current = [], []
+    paragraphs, current, sections, words = [], [], [], 0
     for line in body.splitlines():
         stripped = line.strip()
         if stripped.startswith("#"):
+            sections.append((stripped.lstrip("#").strip(), words))
             continue
         if not stripped:
             if current:
@@ -67,6 +72,7 @@ def parse(text: str) -> Script:
                 current = []
             continue
         current.append(stripped)
+        words += len(stripped.split())
     if current:
         paragraphs.append(" ".join(current))
     spoken = "\n\n".join(paragraphs)
@@ -74,7 +80,8 @@ def parse(text: str) -> Script:
         raise ScriptError("Script has no spoken text.")
 
     overrides = {k: meta[k] for k in OVERRIDE_KEYS if meta.get(k)}
-    return Script(title=meta["title"], date=meta["date"], spoken_text=spoken, overrides=overrides)
+    return Script(title=meta["title"], date=meta["date"], spoken_text=spoken, overrides=overrides,
+                  sections=tuple(sections))
 
 
 def check(script: Script, *, max_words: int, disclosure_words: int, blocked_terms=()) -> None:

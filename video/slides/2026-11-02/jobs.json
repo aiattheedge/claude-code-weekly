@@ -1,0 +1,62 @@
+[
+  {
+    "html": "slide-01.html",
+    "out": "out/slides/2026-11-02/slide-01.png",
+    "width": 1920,
+    "height": 1080
+  },
+  {
+    "html": "slide-02.html",
+    "out": "out/slides/2026-11-02/slide-02.png",
+    "width": 1920,
+    "height": 1080
+  },
+  {
+    "html": "slide-03.html",
+    "out": "out/slides/2026-11-02/slide-03.png",
+    "width": 1920,
+    "height": 1080
+  },
+  {
+    "html": "slide-04.html",
+    "out": "out/slides/2026-11-02/slide-04.png",
+    "width": 1920,
+    "height": 1080
+  },
+  {
+    "html": "slide-05.html",
+    "out": "out/slides/2026-11-02/slide-05.png",
+    "width": 1920,
+    "height": 1080
+  },
+  {
+    "html": "slide-06.html",
+    "out": "out/slides/2026-11-02/slide-06.png",
+    "width": 1920,
+    "height": 1080
+  },
+  {
+    "html": "slide-07.html",
+    "out": "out/slides/2026-11-02/slide-07.png",
+    "width": 1920,
+    "height": 1080
+  },
+  {
+    "html": "slide-08.html",
+    "out": "out/slides/2026-11-02/slide-08.png",
+    "width": 1920,
+    "height": 1080
+  },
+  {
+    "html": "slide-09.html",
+    "out": "out/slides/2026-11-02/slide-09.png",
+    "width": 1920,
+    "height": 1080
+  },
+  {
+    "html": "slide-10.html",
+    "out": "out/slides/2026-11-02/slide-10.png",
+    "width": 1920,
+    "height": 1080
+  }
+]

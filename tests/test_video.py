@@ -21,8 +21,10 @@ import compose  # noqa: E402
 import heygen_client  # noqa: E402
 import make_video  # noqa: E402
 import script_file  # noqa: E402
+import slides  # noqa: E402
 
 SAMPLE = os.path.join(ROOT, "video", "samples", "script-2026-11-02-duet.md")
+SCRIPT_1102 = os.path.join(ROOT, "video", "script-2026-11-02.md")
 GOOD = "---\ntitle: Test\ndate: 2026-11-02\n---\n# Label\nThis is an AI-generated video.\n\n<!-- note -->\nSecond paragraph.\n"
 
 
@@ -98,6 +100,51 @@ class LookTests(unittest.TestCase):
             make_video.choose_look([], engine="avatar_v")
 
 
+class SlideTests(unittest.TestCase):
+    SCRIPT = "---\ntitle: T\ndate: 2026-11-02\n---\n# A\nAI one two three.\n\n# B\nfour five six.\n# C\nseven eight\n"
+
+    def test_sections_mark_first_spoken_word(self):
+        s = script_file.parse(self.SCRIPT)
+        self.assertEqual(s.sections, (("A", 0), ("B", 4), ("C", 7)))
+        self.assertEqual(s.word_count, 9)
+
+    def test_check(self):
+        sec = script_file.parse(self.SCRIPT).sections
+        slides.check([{"section": "A"}, {"section": "C"}], sec)
+        for bad in ([{"section": "B"}], [{"section": "A"}, {"section": "Z"}],
+                    [{"section": "A"}, {"section": "C"}, {"section": "B"}]):
+            with self.assertRaises(slides.SlideError):
+                slides.check(bad, sec)
+
+    def test_schedule_follows_caption_times(self):
+        sec = script_file.parse(self.SCRIPT).sections
+        srt = ("1\n00:00:00,000 --> 00:00:04,000\nAI one two three.\n\n"
+               "2\n00:00:04,000 --> 00:00:07,000\nfour five six.\n\n"
+               "3\n00:00:07,500 --> 00:00:09,000\nseven eight\n")
+        deck = [{"section": s, "html": f"{s}.html", "png": f"{s}.png"} for s in "ABC"]
+        self.assertEqual(slides.schedule(deck, sec, 9, srt, 10.0),
+                         [("A.png", 0.0, 4.0), ("B.png", 4.0, 7.5), ("C.png", 7.5, 10.0)])
+
+    def test_too_short_slide_is_refused(self):
+        sec = (("A", 0), ("B", 1))
+        deck = [{"section": "A", "html": "a", "png": "a"}, {"section": "B", "html": "b", "png": "b"}]
+        with self.assertRaises(slides.SlideError):
+            slides.schedule(deck, sec, 100, "", 10.0)
+
+    def test_nov_2_slides_fit_the_nov_2_script(self):
+        with open(SCRIPT_1102, encoding="utf-8") as f:
+            s = script_file.parse(f.read())
+        deck = slides.load(ROOT, "2026-11-02")
+        slides.check(deck, s.sections)
+        self.assertEqual(len(deck), 10)
+        folder = slides.slides_dir(ROOT, "2026-11-02")
+        with open(os.path.join(folder, "jobs.json"), encoding="utf-8") as f:
+            jobs = json.load(f)
+        self.assertEqual([(j["html"], j["out"]) for j in jobs], [(d["html"], d["png"]) for d in deck])
+        for d in deck:
+            self.assertTrue(os.path.exists(os.path.join(folder, d["html"])), d["html"])
+
+
 class CaptionTests(unittest.TestCase):
     def test_estimate_srt(self):
         srt = compose.estimate_srt("one two three four five", 10.0, words_per_cue=2)
@@ -168,13 +215,14 @@ class EndToEndTests(unittest.TestCase):
         self.server.server_close()
         shutil.rmtree(self.tmp)
 
-    def _run(self, *args):
+    def _run(self, *args, deck=None):
         env = {"HEYGEN_API_KEY": "test-key", "VIDEO_OUT_DIR": self.tmp}
         # Use the real config, minus the chosen look, so these tests don't depend on Ian's HeyGen account.
         config = make_video.load_config()
         config["heygen"].update(avatar_id="", avatar_name="")
         with mock.patch.dict(os.environ, env), mock.patch.object(heygen_client, "BASE_URL", self.base), \
-                mock.patch.object(make_video, "load_config", return_value=config):
+                mock.patch.object(make_video, "load_config", return_value=config), \
+                mock.patch.object(make_video.slide_deck, "load", return_value=deck):
             return make_video.main([SAMPLE, *args])
 
     def test_dry_run_never_creates_a_video(self):
@@ -191,6 +239,25 @@ class EndToEndTests(unittest.TestCase):
         info = compose.probe(final)
         self.assertAlmostEqual(info["duration"], 3 + 5, delta=0.5)  # render + end card
         self.assertEqual((info["width"], info["height"]), (640, 360))
+
+    def test_render_with_slides_puts_twin_in_corner(self):
+        from PIL import Image
+        deck = []
+        for i, (section, color) in enumerate([("Disclosure", "navy"), ("Close", "darkgreen")], 1):
+            png = os.path.join(self.tmp, f"slide-{i}.png")
+            Image.new("RGB", (1920, 1080), color).save(png)
+            deck.append({"section": section, "html": f"slide-{i}.html", "png": png})
+        self.assertEqual(self._run(deck=deck), 0)
+        final = os.path.join(self.tmp, "2026-11-02", "claude-code-latest-2026-11-02.mp4")
+        info = compose.probe(final)
+        self.assertEqual((info["width"], info["height"]), (1920, 1080))
+        self.assertAlmostEqual(info["duration"], 3 + 5, delta=0.5)
+
+    def test_missing_slide_images_stop_before_paying(self):
+        deck = [{"section": "Disclosure", "html": "x.html", "png": os.path.join(self.tmp, "nope.png")}]
+        with self.assertRaises(slides.SlideError):
+            self._run(deck=deck)
+        self.assertFalse([r for r in self.requests if r[0] == "POST"])
 
 
 if __name__ == "__main__":

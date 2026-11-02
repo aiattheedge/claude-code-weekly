@@ -71,6 +71,28 @@ jobs:
       - name: Unit tests
         run: python3 -m unittest discover -s tests -v
 
+      - name: Check for slides
+        id: slides
+        env:
+          DATE: ${{ steps.pick.outputs.date }}
+        run: |
+          if [ -f "video/slides/$DATE/slides.json" ]; then echo "dir=video/slides/$DATE" >> "$GITHUB_OUTPUT"; fi
+
+      - uses: actions/setup-node@v4
+        if: steps.pick.outputs.mode == 'render' && steps.slides.outputs.dir != ''
+        with:
+          node-version: "22"
+
+      - name: Render slide images
+        # Before the paid HeyGen step, so a broken slide stops the run without spending credits.
+        if: steps.pick.outputs.mode == 'render' && steps.slides.outputs.dir != ''
+        env:
+          RENDER_DIR: ${{ steps.slides.outputs.dir }}
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+          node scripts/render.js
+
       - name: Make video
         env:
           HEYGEN_API_KEY: ${{ secrets.HEYGEN_API_KEY }}
@@ -88,7 +110,8 @@ jobs:
           fi
 
       - name: Keep video as run artifact
-        if: steps.pick.outputs.mode == 'render'
+        # always(): if a later step fails, the paid HeyGen render is still kept.
+        if: always() && steps.pick.outputs.mode == 'render'
         uses: actions/upload-artifact@v4
         with:
           name: video-${{ steps.pick.outputs.date }}

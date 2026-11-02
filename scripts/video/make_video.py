@@ -24,6 +24,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import compose  # noqa: E402
 import script_file  # noqa: E402
+import slides as slide_deck  # noqa: E402
 from heygen_client import HeyGenClient, HeyGenError, download  # noqa: E402
 
 REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -135,9 +136,13 @@ def main(argv=None) -> int:
                       blocked_terms=blocked)
     settings = resolve_settings(config, script)
     est = estimate(script, config, settings["engine"])
+    deck = slide_deck.load(REPO_ROOT, script.date)
+    if deck:
+        slide_deck.check(deck, script.sections)
     summary = [f"## Video: {script.title} ({script.date})",
                f"- Script: `{args.script}`, {est['words']} words, about {est['minutes']} min",
-               f"- Engine: {settings['engine']}, estimated cost ${est['cost_usd']}"]
+               f"- Engine: {settings['engine']}, estimated cost ${est['cost_usd']}",
+               f"- Layout: {f'{len(deck)} slides, twin in the corner' if deck else 'twin full frame'}"]
 
     api_key = os.environ.get("HEYGEN_API_KEY", "")
     if args.dry_run and not api_key:
@@ -158,6 +163,11 @@ def main(argv=None) -> int:
     if args.dry_run:
         write_summary(summary + ["- Dry run: nothing was rendered or charged."])
         return 0
+
+    if deck:  # check before paying HeyGen
+        missing = [s["png"] for s in deck if not os.path.exists(os.path.join(REPO_ROOT, s["png"]))]
+        if missing:
+            raise slide_deck.SlideError(f"Slide images were not rendered: {missing}")
 
     out_dir = os.path.join(os.environ.get("VIDEO_OUT_DIR", os.path.join(REPO_ROOT, "out", "video")), script.date)
     os.makedirs(out_dir, exist_ok=True)
@@ -180,9 +190,22 @@ def main(argv=None) -> int:
         caption_source = "estimated from the script (HeyGen sent no subtitles)"
 
     final = os.path.join(out_dir, f"claude-code-latest-{script.date}.mp4")
-    compose.finish(raw, srt, final, label=config["disclosure"]["label_text"],
+    base, caption_style = raw, compose.CAPTION_STYLE
+    if deck:
+        with open(srt, encoding="utf-8") as f:
+            timing = slide_deck.schedule(deck, script.sections, script.word_count, f.read(),
+                                         compose.probe(raw)["duration"])
+        timing = [(os.path.join(REPO_ROOT, png), start, end) for png, start, end in timing]
+        layout = config.get("layout", {})
+        base = os.path.join(out_dir, "with-slides.mp4")
+        compose.with_slides(raw, timing, base, twin_width=layout.get("twin_width", 0.30),
+                            twin_max_height=layout.get("twin_max_height", 0.50),
+                            margin=layout.get("margin_px", 40))
+        caption_style = compose.SLIDES_CAPTION_STYLE
+        summary.append("- Slides: " + ", ".join(f"{os.path.basename(p)} at {round(t0)}s" for p, t0, _ in timing))
+    compose.finish(base, srt, final, label=config["disclosure"]["label_text"],
                    end_lines=config["end_card"]["lines"], end_seconds=config["end_card"]["seconds"],
-                   workdir=out_dir)
+                   workdir=out_dir, caption_style=caption_style)
     seconds = data.get("duration") or compose.probe(raw)["duration"]
     with open(os.path.join(out_dir, "render.json"), "w", encoding="utf-8") as f:
         json.dump({"video_id": video_id, "look_id": look["id"], "voice_id": voice_id,
@@ -196,6 +219,6 @@ def main(argv=None) -> int:
 if __name__ == "__main__":
     try:
         sys.exit(main())
-    except (script_file.ScriptError, HeyGenError) as err:
+    except (script_file.ScriptError, HeyGenError, slide_deck.SlideError) as err:
         print(f"::error::{err}")
         sys.exit(1)

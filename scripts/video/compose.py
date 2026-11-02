@@ -1,4 +1,5 @@
-"""Finish a HeyGen render with ffmpeg: burned-in captions, an AI label and an end card."""
+"""Finish a HeyGen render with ffmpeg: optional slides with the twin in a corner,
+burned-in captions, an AI label and an end card."""
 import json
 import os
 import subprocess
@@ -7,6 +8,10 @@ FONT_REGULAR = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
 FONT_BOLD = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
 CAPTION_STYLE = ("FontName=DejaVu Sans,FontSize=13,PrimaryColour=&H00FFFFFF,"
                  "BackColour=&H99000000,BorderStyle=3,Outline=1,Shadow=0,MarginV=22")
+
+
+# Slides layout: captions sit centred under the slide area, clear of the twin in the bottom-right corner.
+SLIDES_CAPTION_STYLE = CAPTION_STYLE + ",Alignment=2,MarginR=140,MarginL=10"
 
 
 def probe(path: str) -> dict:
@@ -56,8 +61,34 @@ def _drawtext(textfile: str, font: str, size: int, x: str, y: str, box: bool = F
     return ":".join(parts)
 
 
+def with_slides(raw_video: str, schedule: list, out_path: str, *, width: int = 1920, height: int = 1080,
+                twin_width: float = 0.30, twin_max_height: float = 0.50, margin: int = 40,
+                border_px: int = 4, border_color: str = "0xff7a1a", background: str = "0x0b0b0a") -> None:
+    """Write out_path: slides full screen, switching per schedule [(png, start, end)], with the
+    twin video scaled into the bottom-right corner and its audio kept."""
+    info = probe(raw_video)
+    box_w, box_h = round(width * twin_width), round(height * twin_max_height)
+    inputs, filters = ["-i", raw_video], []
+    for i, (png, start, end) in enumerate(schedule, 1):
+        inputs += ["-loop", "1", "-framerate", "30", "-t", f"{end - start:.3f}", "-i", png]
+        filters.append(f"[{i}:v]scale={width}:{height}:force_original_aspect_ratio=decrease,"
+                       f"pad={width}:{height}:(ow-iw)/2:(oh-ih)/2:color={background},setsar=1,fps=30[s{i}]")
+    n = len(schedule)
+    filters.append("".join(f"[s{i}]" for i in range(1, n + 1)) + f"concat=n={n}:v=1:a=0[slides]")
+    filters.append(f"[0:v]scale=w={box_w}:h={box_h}:force_original_aspect_ratio=decrease,"
+                   f"scale=trunc(iw/2)*2:trunc(ih/2)*2,"
+                   f"pad=iw+{2 * border_px}:ih+{2 * border_px}:{border_px}:{border_px}:color={border_color},setsar=1[twin]")
+    filters.append(f"[slides][twin]overlay=x=W-w-{margin}:y=H-h-{margin}:shortest=1,fps=30[v]")
+    cmd = ["ffmpeg", "-y", "-hide_banner", "-loglevel", "error", *inputs,
+           "-filter_complex", ";".join(filters), "-map", "[v]", "-map", "0:a",
+           "-t", f"{info['duration']:.3f}",
+           "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p",
+           "-c:a", "aac", "-b:a", "192k", out_path]
+    subprocess.run(cmd, check=True)
+
+
 def finish(raw_video: str, srt: str, out_path: str, *, label: str, end_lines: list,
-           end_seconds: int, workdir: str) -> None:
+           end_seconds: int, workdir: str, caption_style: str = CAPTION_STYLE) -> None:
     """Write out_path: raw video with captions and label, followed by the end card."""
     info = probe(raw_video)
     w, h = info["width"], info["height"]
@@ -70,7 +101,7 @@ def finish(raw_video: str, srt: str, out_path: str, *, label: str, end_lines: li
         return path
 
     label_file = textfile("label.txt", label)
-    main = (f"[0:v]setsar=1,subtitles=filename={srt}:force_style='{CAPTION_STYLE}',"
+    main = (f"[0:v]setsar=1,subtitles=filename={srt}:force_style='{caption_style}',"
             + _drawtext(label_file, FONT_BOLD, round(unit * 0.035), str(round(w * 0.03)),
                         str(round(h * 0.03)), box=True, pad=round(unit * 0.012))
             + "[main]")
