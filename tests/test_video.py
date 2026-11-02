@@ -241,11 +241,11 @@ class EndToEndTests(unittest.TestCase):
         self.assertEqual((info["width"], info["height"]), (640, 360))
 
     def test_render_with_slides_puts_twin_in_corner(self):
-        from PIL import Image
         deck = []
         for i, (section, color) in enumerate([("Disclosure", "navy"), ("Close", "darkgreen")], 1):
             png = os.path.join(self.tmp, f"slide-{i}.png")
-            Image.new("RGB", (1920, 1080), color).save(png)
+            subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-f", "lavfi", "-i",
+                            f"color=c={color}:s=1920x1080", "-frames:v", "1", png], check=True)
             deck.append({"section": section, "html": f"slide-{i}.html", "png": png})
         self.assertEqual(self._run(deck=deck), 0)
         final = os.path.join(self.tmp, "2026-11-02", "claude-code-latest-2026-11-02.mp4")
