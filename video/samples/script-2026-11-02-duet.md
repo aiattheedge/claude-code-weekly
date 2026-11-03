@@ -3,15 +3,20 @@ title: How I'm using Claude Duet
 date: 2026-11-02
 ---
 <!-- Sample script for the first video. Spoken word for word by Ian's HeyGen twin.
-     Lines starting with # are section labels and are not spoken. -->
-
-# Disclosure
-
-Quick note before we start. This is an AI-generated video. It's my digital twin and my cloned voice, reading a script I approved. I'll tell you how I made it at the end.
+     Lines starting with # are section labels and are not spoken.
+     Order: hook first (one or two sentences), then the spoken AI line, then the rest. -->
 
 # Hook
 
-Hi, I'm Ian. Most weeks in Claude Code Latest I walk through plugin updates. This week I want to talk about something different. I've been using Claude Duet, Anthropic's new always-on personal agent app. Here's what it's actually doing for me.
+Hi, I'm Ian. I gave an AI agent the night shift, and it fixed my podcast while I slept.
+
+# Disclosure
+
+Quick note: this is an AI-generated video. It's my digital twin and my cloned voice, reading a script I approved. I'll tell you how I made it at the end.
+
+# Intro
+
+Most weeks in Claude Code Latest I walk through plugin updates. This week I want to talk about something different. I've been using Claude Duet, Anthropic's new always-on personal agent app. Here's what it's actually doing for me.
 
 # First impression
 

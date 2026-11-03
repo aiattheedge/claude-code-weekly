@@ -63,7 +63,11 @@ date: 2026-11-02
 <!-- Notes like this are not spoken. -->
 # Section labels like this are not spoken
 
-Quick note before we start. This is an AI-generated video. ...
+Hi, I'm Ian. I gave an AI agent the night shift, and here's what it did.
+
+# Disclosure
+
+Quick note: this is an AI-generated video. ...
 ```
 
 - File name: `video/script-YYYY-MM-DD.md`, using the issue's Monday date.
@@ -71,7 +75,10 @@ Quick note before we start. This is an AI-generated video. ...
   `avatar_v`), `aspect_ratio`, `resolution`, `avatar_id` and `voice_id` optionally override
   `video/config.json` for one video.
 - Body: plain spoken sentences, written the way Ian talks. Blank lines separate paragraphs.
-- Rules the workflow enforces: the word "AI" must appear in the first 40 spoken words,
+- Order: open with the hook (one or two sentences), then the spoken AI line. The on-screen
+  AI-generated label stays up the whole video.
+- Rules the workflow enforces: "AI-generated", "AI twin" or "digital twin" must appear in the
+  first 50 spoken words (about 15 seconds),
   at most 900 words (about 6 minutes), and none of the blocked terms.
 - Content rules (not machine-checked): no employer, no job search, no church or personal names.
 - See `video/samples/script-2026-11-02-duet.md` for a full example. Files under
@@ -117,6 +124,9 @@ same script within 24 hours reuses the same HeyGen video (the request carries an
 | `heygen.resolution` | `1080p` | `720p`, `1080p` or `4k` (4k only on some avatars) |
 | `heygen.aspect_ratio` | `auto` | `auto` follows the twin footage; or `16:9`, `9:16`, `1:1`, ... |
 | `heygen.avatar_id` / `voice_id` / `avatar_name` | blank | Pin a look, voice, or pick a look by name |
+| `heygen.motion_prompt` | podcast-host direction | Avatar V body motion and gestures, in plain English (blank = none) |
+| `heygen.more_blinking` | `true` | Avatar V extra blinking |
+| `disclosure.require_ai_in_first_words` | 50 | The spoken AI line must come within this many words |
 | `limits.max_words` | 900 | Script length cap |
 | `limits.poll_timeout_minutes` | 100 | How long to wait for HeyGen |
 | `disclosure.label_text` | `AI-generated` | On-screen label |

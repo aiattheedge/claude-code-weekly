@@ -6,8 +6,8 @@
     "engine": "avatar_v",
     "resolution": "1080p",
     "aspect_ratio": "auto",
-    "motion_prompt": "",
-    "more_blinking": false
+    "motion_prompt": "Talks to the camera like a relaxed podcast host. Natural head turns and small nods on key points, an occasional small hand gesture that returns to rest, warm expression, eyes on the camera.",
+    "more_blinking": true
   },
   "layout": {
     "twin_width": 0.30,
@@ -22,7 +22,7 @@
     "poll_timeout_minutes": 100
   },
   "disclosure": {
-    "require_ai_in_first_words": 40,
+    "require_ai_in_first_words": 50,
     "label_text": "AI-generated"
   },
   "end_card": {

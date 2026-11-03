@@ -19,6 +19,7 @@ import datetime
 import re
 
 REQUIRED_KEYS = ("title", "date")
+DISCLOSURE = re.compile(r"\bai-generated\b|\bai twin\b|\bdigital twin\b")
 OVERRIDE_KEYS = ("engine", "aspect_ratio", "resolution", "avatar_id", "voice_id", "motion_prompt", "more_blinking")
 
 
@@ -88,9 +89,12 @@ def check(script: Script, *, max_words: int, disclosure_words: int, blocked_term
     """Raise ScriptError when the script breaks a content rule."""
     if script.word_count > max_words:
         raise ScriptError(f"Script has {script.word_count} words; the limit is {max_words}.")
-    opening = script.spoken_text.split()[:disclosure_words]
-    if not any(re.sub(r"\W", "", w) == "AI" or w.startswith("AI-") for w in opening):
-        raise ScriptError(f"The first {disclosure_words} spoken words must say the video is AI-generated.")
+    # The hook may come first, but the spoken disclosure must follow within disclosure_words.
+    # A bare "AI" (as in "AI news") isn't enough: it must say "AI-generated", "AI twin" or "digital twin".
+    opening = " ".join(script.spoken_text.split()[:disclosure_words]).lower()
+    if not DISCLOSURE.search(opening):
+        raise ScriptError(f"The first {disclosure_words} spoken words must say the video is AI-generated "
+                          '("AI-generated", "AI twin" or "digital twin").')
     full = f"{script.title}\n{script.spoken_text}".lower()
     for term in blocked_terms:
         if term and term.lower() in full:

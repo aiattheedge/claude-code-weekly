@@ -71,6 +71,13 @@ class PayloadTests(unittest.TestCase):
         self.assertEqual(payload["engine"], {"type": "avatar_v"})
         self.assertNotIn("motion_prompt", payload)
 
+    def test_config_turns_motion_on_by_default(self):
+        heygen = make_video.load_config()["heygen"]
+        payload = make_video.build_payload(self.SCRIPT, dict(self.BASE, motion_prompt=heygen["motion_prompt"],
+                                                              more_blinking=heygen["more_blinking"]), "l", "v")
+        self.assertEqual(payload["engine"], {"type": "avatar_v", "more_blinking": True})
+        self.assertTrue(payload["motion_prompt"])
+
     def test_motion_prompt_and_blinking(self):
         settings = dict(self.BASE, motion_prompt="Nods while talking", more_blinking="true")
         payload = make_video.build_payload(self.SCRIPT, settings, "l", "v")
@@ -232,7 +239,8 @@ class EndToEndTests(unittest.TestCase):
     def test_render_and_finish(self):
         self.assertEqual(self._run(), 0)
         post = next(r for r in self.requests if r[0] == "POST")
-        self.assertEqual(post[2]["engine"], {"type": "avatar_v"})
+        self.assertEqual(post[2]["engine"], {"type": "avatar_v", "more_blinking": True})
+        self.assertTrue(post[2]["motion_prompt"])
         self.assertEqual((post[2]["avatar_id"], post[2]["voice_id"]), ("look1", "voice1"))
         self.assertTrue(post[3].startswith("ccw-video-"))
         final = os.path.join(self.tmp, "2026-11-02", "claude-code-latest-2026-11-02.mp4")
@@ -242,7 +250,7 @@ class EndToEndTests(unittest.TestCase):
 
     def test_render_with_slides_puts_twin_in_corner(self):
         deck = []
-        for i, (section, color) in enumerate([("Disclosure", "navy"), ("Close", "darkgreen")], 1):
+        for i, (section, color) in enumerate([("Hook", "navy"), ("Close", "darkgreen")], 1):
             png = os.path.join(self.tmp, f"slide-{i}.png")
             subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-f", "lavfi", "-i",
                             f"color=c={color}:s=1920x1080", "-frames:v", "1", png], check=True)
@@ -254,7 +262,7 @@ class EndToEndTests(unittest.TestCase):
         self.assertAlmostEqual(info["duration"], 3 + 5, delta=0.5)
 
     def test_missing_slide_images_stop_before_paying(self):
-        deck = [{"section": "Disclosure", "html": "x.html", "png": os.path.join(self.tmp, "nope.png")}]
+        deck = [{"section": "Hook", "html": "x.html", "png": os.path.join(self.tmp, "nope.png")}]
         with self.assertRaises(slides.SlideError):
             self._run(deck=deck)
         self.assertFalse([r for r in self.requests if r[0] == "POST"])
