@@ -32,5 +32,18 @@
       "This video is AI-generated from my own script.",
       "Read the full issue: aiattheedge.github.io/claude-code-weekly"
     ]
+  },
+  "kling": {
+    "endpoint": "fal-ai/kling-video/v2.6/pro/image-to-video",
+    "duration": "5",
+    "generate_audio": false,
+    "prompt": "The man in the photo walks toward the camera with a relaxed, confident stride, stops in a medium shot, looks into the lens, smiles warmly and gives a small friendly nod. Steady locked-off camera, natural lighting, realistic motion, his face and clothes stay the same.",
+    "negative_prompt": "blur, distort, low quality, extra limbs, warped face, changing clothes, text, watermark",
+    "price_per_second_usd": { "silent": 0.07, "audio": 0.14 },
+    "max_cost_usd": 1.00,
+    "photo_release": "kling-inputs",
+    "label_text": "AI-generated · Made with Kling AI",
+    "poll_seconds": 10,
+    "timeout_minutes": 20
   }
 }

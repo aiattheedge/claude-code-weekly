@@ -1,0 +1,96 @@
+name: Kling walk-in test
+# Makes a short silent Kling clip of Ian walking up to the camera from one photo, through fal.ai.
+# Runs only when started by hand. The photo is an asset on the draft release named in
+# video/config.json (kling.photo_release), so it never sits in the public repo.
+on:
+  workflow_dispatch:
+    inputs:
+      photo:
+        description: "Photo file name on the kling-inputs draft release, e.g. ian-full-length.jpg"
+        required: true
+      prompt:
+        description: "Optional prompt (blank = the one in video/config.json)"
+        required: false
+        default: ""
+      duration:
+        description: "Clip length in seconds"
+        type: choice
+        options: ["5", "10"]
+        default: "5"
+      mode:
+        description: "dry-run is free (checks the photo and cost). render spends fal.ai credit (about $0.35 per 5 s)."
+        type: choice
+        options: [dry-run, render]
+        default: dry-run
+permissions:
+  contents: write
+concurrency:
+  group: kling-walkin
+  cancel-in-progress: false
+jobs:
+  walkin:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ffmpeg and fonts
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q --no-install-recommends ffmpeg fonts-dejavu-core
+
+      - name: Unit tests
+        run: python3 -m unittest discover -s tests -v
+
+      - name: Get the photo
+        id: photo
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PHOTO: ${{ inputs.photo }}
+        run: |
+          set -euo pipefail
+          if ! printf '%s' "$PHOTO" | grep -Eq '^[A-Za-z0-9._-]+\.(jpe?g|png|webp)$'; then
+            echo "::error::Photo must be a plain .jpg, .png or .webp file name."; exit 1
+          fi
+          release=$(python3 -c 'import json; print(json.load(open("video/config.json"))["kling"]["photo_release"])')
+          mkdir -p "$RUNNER_TEMP/in"
+          gh release download "$release" --pattern "$PHOTO" --dir "$RUNNER_TEMP/in"
+          echo "path=$RUNNER_TEMP/in/$PHOTO" >> "$GITHUB_OUTPUT"
+
+      - name: Make the clip
+        env:
+          FAL_KEY: ${{ secrets.FAL_KEY }}
+          PHOTO_PATH: ${{ steps.photo.outputs.path }}
+          PROMPT: ${{ inputs.prompt }}
+          DURATION: ${{ inputs.duration }}
+          MODE: ${{ inputs.mode }}
+        run: |
+          out="$RUNNER_TEMP/walkin"
+          if [ "$MODE" = "render" ]; then
+            python3 scripts/video/kling_walkin.py "$PHOTO_PATH" "$out" --prompt "$PROMPT" --duration "$DURATION"
+          else
+            python3 scripts/video/kling_walkin.py "$PHOTO_PATH" "$out" --prompt "$PROMPT" --duration "$DURATION" --dry-run
+          fi
+
+      - name: Keep clip as run artifact
+        # always(): a paid clip is kept even if a later step fails.
+        if: always() && inputs.mode == 'render'
+        uses: actions/upload-artifact@v4
+        with:
+          name: kling-walkin-${{ github.run_id }}
+          path: ${{ runner.temp }}/walkin/
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Save clip to the draft release
+        if: inputs.mode == 'render'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          release=$(python3 -c 'import json; print(json.load(open("video/config.json"))["kling"]["photo_release"])')
+          dir="$RUNNER_TEMP/walkin"
+          cp "$dir/walkin.mp4" "$dir/walkin-$GITHUB_RUN_ID.mp4"
+          cp "$dir/walkin.json" "$dir/walkin-$GITHUB_RUN_ID.json"
+          gh release upload "$release" "$dir/walkin-$GITHUB_RUN_ID.mp4" "$dir/walkin-$GITHUB_RUN_ID.json" --clobber
+          echo "- Clip: walkin-$GITHUB_RUN_ID.mp4 on draft release \`$release\`" >> "$GITHUB_STEP_SUMMARY"
