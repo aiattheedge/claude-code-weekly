@@ -36,22 +36,45 @@ class SettingsTests(unittest.TestCase):
         self.assertEqual(kling_walkin.estimate_cost(SETTINGS, "5"), 0.35)
         self.assertEqual(kling_walkin.estimate_cost({**SETTINGS, "generate_audio": True}, "5"), 0.70)
 
-    def test_arguments_are_silent_by_default(self):
-        args = kling_walkin.build_arguments(SETTINGS, "data:image/jpeg;base64,AA==")
+    FRAMES = {"photo": "data:photo", "empty": "data:empty"}
+
+    def test_walk_in_starts_empty_and_ends_on_photo(self):
+        args = kling_walkin.build_arguments(SETTINGS, self.FRAMES, style="walk_in")
+        self.assertEqual((args["start_image_url"], args["end_image_url"]), ("data:empty", "data:photo"))
         self.assertEqual(args["duration"], "5")
         self.assertIs(args["generate_audio"], False)
-        self.assertEqual(args["start_image_url"], "data:image/jpeg;base64,AA==")
 
-    def test_prompt_override_and_bad_duration(self):
-        args = kling_walkin.build_arguments(SETTINGS, "x", prompt=" Wave. ", duration="10")
+    def test_walk_up_starts_on_photo(self):
+        args = kling_walkin.build_arguments(SETTINGS, self.FRAMES, style="walk_up")
+        self.assertEqual(args["start_image_url"], "data:photo")
+        self.assertNotIn("end_image_url", args)
+
+    def test_prompt_override_and_bad_values(self):
+        args = kling_walkin.build_arguments(SETTINGS, self.FRAMES, prompt=" Wave. ", duration="10")
         self.assertEqual((args["prompt"], args["duration"]), ("Wave.", "10"))
         with self.assertRaises(kling_walkin.WalkinError):
-            kling_walkin.build_arguments(SETTINGS, "x", duration="7")
+            kling_walkin.build_arguments(SETTINGS, self.FRAMES, duration="7")
+        with self.assertRaises(kling_walkin.WalkinError):
+            kling_walkin.build_arguments(SETTINGS, self.FRAMES, style="dance")
 
     def test_photo_type_checked(self):
         with tempfile.NamedTemporaryFile(suffix=".gif") as f:
             with self.assertRaises(kling_walkin.WalkinError):
                 kling_walkin.photo_data_uri(f.name)
+
+
+@unittest.skipUnless(HAVE_FFMPEG, "needs ffmpeg")
+class FrameTests(unittest.TestCase):
+    def test_frames_are_1080p_for_tall_and_wide_photos(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            for size in ("320x480", "1000x400"):
+                photo = os.path.join(tmp, f"p{size}.jpg")
+                subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-f", "lavfi", "-i",
+                                f"color=c=gray:s={size}", "-frames:v", "1", photo], check=True)
+                frames = kling_walkin.prepare_frames(photo, os.path.join(tmp, size))
+                for path in frames.values():
+                    info = kling_walkin.probe(path)
+                    self.assertEqual((info["width"], info["height"]), (1920, 1080), path)
 
 
 class _FakeFal(http.server.BaseHTTPRequestHandler):
@@ -127,12 +150,15 @@ class EndToEndTests(unittest.TestCase):
         self.assertEqual(post[1], "/" + SETTINGS["endpoint"])
         self.assertEqual(post[2], "Key test-key")
         self.assertTrue(post[3]["start_image_url"].startswith("data:image/jpeg;base64,"))
+        self.assertTrue(post[3]["end_image_url"].startswith("data:image/jpeg;base64,"))
         self.assertIs(post[3]["generate_audio"], False)
         out = os.path.join(self.tmp, "out")
         for name in ("walkin-raw.mp4", "walkin.mp4", "walkin.json"):
             self.assertTrue(os.path.exists(os.path.join(out, name)), name)
         record = json.load(open(os.path.join(out, "walkin.json")))
         self.assertNotIn("start_image_url", record)
+        self.assertNotIn("end_image_url", record)
+        self.assertEqual(record["style"], "walk_in")
         self.assertEqual(record["request_id"], "req1")
 
 

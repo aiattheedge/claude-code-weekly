@@ -37,7 +37,11 @@
     "endpoint": "fal-ai/kling-video/v2.6/pro/image-to-video",
     "duration": "5",
     "generate_audio": false,
-    "prompt": "The man in the photo walks toward the camera with a relaxed, confident stride, stops in a medium shot, looks into the lens, smiles warmly and gives a small friendly nod. Steady locked-off camera, natural lighting, realistic motion, his face and clothes stay the same.",
+    "style": "walk_in",
+    "prompts": {
+      "walk_in": "A plain empty room. A man walks into the frame from the right side with a relaxed, natural stride, stops in the center facing the camera, smiles warmly and gives a small friendly nod. He is exactly the man in the final frame: same face, glasses, beard and clothes. Steady locked-off camera, realistic motion.",
+      "walk_up": "The man in the photo walks toward the camera with a relaxed, natural stride, stops close to the lens, smiles warmly and gives a small friendly nod. His face and clothes stay the same. Steady locked-off camera, realistic motion."
+    },
     "negative_prompt": "blur, distort, low quality, extra limbs, warped face, changing clothes, text, watermark",
     "price_per_second_usd": { "silent": 0.07, "audio": 0.14 },
     "max_cost_usd": 1.00,

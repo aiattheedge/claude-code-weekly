@@ -8,6 +8,11 @@ on:
       photo:
         description: "Photo file name on the kling-inputs draft release, e.g. ian-full-length.jpg"
         required: true
+      style:
+        description: "walk_in = he walks into an empty frame; walk_up = he starts in frame and walks toward the camera"
+        type: choice
+        options: [walk_in, walk_up]
+        default: walk_in
       prompt:
         description: "Optional prompt (blank = the one in video/config.json)"
         required: false
@@ -61,15 +66,16 @@ jobs:
         env:
           FAL_KEY: ${{ secrets.FAL_KEY }}
           PHOTO_PATH: ${{ steps.photo.outputs.path }}
+          STYLE: ${{ inputs.style }}
           PROMPT: ${{ inputs.prompt }}
           DURATION: ${{ inputs.duration }}
           MODE: ${{ inputs.mode }}
         run: |
           out="$RUNNER_TEMP/walkin"
           if [ "$MODE" = "render" ]; then
-            python3 scripts/video/kling_walkin.py "$PHOTO_PATH" "$out" --prompt "$PROMPT" --duration "$DURATION"
+            python3 scripts/video/kling_walkin.py "$PHOTO_PATH" "$out" --style "$STYLE" --prompt "$PROMPT" --duration "$DURATION"
           else
-            python3 scripts/video/kling_walkin.py "$PHOTO_PATH" "$out" --prompt "$PROMPT" --duration "$DURATION" --dry-run
+            python3 scripts/video/kling_walkin.py "$PHOTO_PATH" "$out" --style "$STYLE" --prompt "$PROMPT" --duration "$DURATION" --dry-run
           fi
 
       - name: Keep clip as run artifact
@@ -78,7 +84,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: kling-walkin-${{ github.run_id }}
-          path: ${{ runner.temp }}/walkin/
+          path: |
+            ${{ runner.temp }}/walkin/walkin*.mp4
+            ${{ runner.temp }}/walkin/walkin.json
           if-no-files-found: ignore
           retention-days: 30
 
