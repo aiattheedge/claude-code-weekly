@@ -47,6 +47,18 @@ jobs:
       - name: Unit tests
         run: python3 -m unittest discover -s tests -v
 
+      - name: Make sure the private draft release exists
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          release=$(python3 -c 'import json; print(json.load(open("video/config.json"))["kling"]["photo_release"])')
+          if ! gh release view "$release" >/dev/null 2>&1; then
+            gh release create "$release" --draft --title "Kling walk-in inputs and test clips (private draft)" \
+              --notes "Private draft: the photo for the Kling walk-in test and the clips it makes. Do not publish."
+            echo "Created draft release $release"
+          fi
+
       - name: Get the photo
         id: photo
         env:
@@ -59,7 +71,10 @@ jobs:
           fi
           release=$(python3 -c 'import json; print(json.load(open("video/config.json"))["kling"]["photo_release"])')
           mkdir -p "$RUNNER_TEMP/in"
-          gh release download "$release" --pattern "$PHOTO" --dir "$RUNNER_TEMP/in"
+          if ! gh release download "$release" --pattern "$PHOTO" --dir "$RUNNER_TEMP/in"; then
+            echo "::error::$PHOTO is not on the $release draft release. Attach it there (Releases > $release > Edit) and run again."
+            exit 1
+          fi
           echo "path=$RUNNER_TEMP/in/$PHOTO" >> "$GITHUB_OUTPUT"
 
       - name: Make the clip
