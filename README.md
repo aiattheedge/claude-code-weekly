@@ -3,6 +3,8 @@
 Source for the weekly **Claude Code Latest** issue, published at
 https://aiattheedge.github.io/claude-code-weekly/.
 
+Current issue: Nov 2 to 9, 2026 (`og-cover-v7.png`, images in `images/2026-11-09/`).
+
 | Path | What it is |
 | --- | --- |
 | `index.html`, `og-cover-v*.png` | The current issue page and its social images |
