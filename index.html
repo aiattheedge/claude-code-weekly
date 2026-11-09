@@ -3,20 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Claude Code Latest Oct 26-Nov 1: plugin updates of the week</title>
-<meta name="description" content="Plugin changes in Claude Code 2.1.311 to 2.1.316: Monitor tool hook rules, PreCompact fix, prompt hook limits, folder skills, SubagentStop.">
+<title>Claude Code Latest Nov 2-9: plugin updates of the week</title>
+<meta name="description" content="Plugin changes in Claude Code 2.1.317 to 2.1.319: fail-closed SDK hooks, plugin status lines, hooks after interrupts, dependency updates, eval tests.">
 <link rel="canonical" href="https://aiattheedge.github.io/claude-code-weekly/">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://aiattheedge.github.io/claude-code-weekly/">
-<meta property="og:title" content="Claude Code Latest Oct 26-Nov 1: plugin updates of the week">
-<meta property="og:description" content="Plugin changes in Claude Code 2.1.311 to 2.1.316: Monitor tool hook rules, PreCompact fix, prompt hook limits, folder skills, SubagentStop.">
-<meta property="og:image" content="https://aiattheedge.github.io/claude-code-weekly/og-cover-v6.png">
+<meta property="og:title" content="Claude Code Latest Nov 2-9: plugin updates of the week">
+<meta property="og:description" content="Plugin changes in Claude Code 2.1.317 to 2.1.319: fail-closed SDK hooks, plugin status lines, hooks after interrupts, dependency updates, eval tests.">
+<meta property="og:image" content="https://aiattheedge.github.io/claude-code-weekly/og-cover-v7.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Claude Code Latest Oct 26-Nov 1: plugin updates of the week">
-<meta name="twitter:description" content="Plugin changes in Claude Code 2.1.311 to 2.1.316: Monitor tool hook rules, PreCompact fix, prompt hook limits, folder skills, SubagentStop.">
-<meta name="twitter:image" content="https://aiattheedge.github.io/claude-code-weekly/og-cover-v6.png">
+<meta name="twitter:title" content="Claude Code Latest Nov 2-9: plugin updates of the week">
+<meta name="twitter:description" content="Plugin changes in Claude Code 2.1.317 to 2.1.319: fail-closed SDK hooks, plugin status lines, hooks after interrupts, dependency updates, eval tests.">
+<meta name="twitter:image" content="https://aiattheedge.github.io/claude-code-weekly/og-cover-v7.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,700;1,6..72,500&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
 /* Layout: black editorial page, orange accent, 10-second quick-run list up top, one icon tile per feature. Deliberately single-theme (Claude Code dark). */
@@ -105,209 +105,175 @@ ul.src{padding-left:20px;margin:8px 0}
 <body>
 <div class="wrap">
   <header class="hero">
-    <div class="kicker"><i></i> Claude Code · Latest · Oct 26 to Nov 1, 2026</div>
-    <h1>Claude Code <em>plugin</em> updates: <span style="color:var(--orange)">Oct 26 to Nov 1</span></h1>
-    <p class="lede">Four Claude Code releases shipped between Monday Oct 26 and Sunday Nov 1 (2.1.311, 2.1.312, 2.1.314 and 2.1.316). I read every changelog entry and kept the plugin changes that last week&#x27;s issue did not cover. Five have a snippet you can copy. The rest are quick notes below. After the cards, I share how I&#x27;m using Claude Duet, Anthropic&#x27;s new always-on agent app.</p>
-    <div class="stats"><span class="chip"><b>4</b> releases read</span><span class="chip"><b>5</b> features</span><span class="chip"><b>5</b> copy-paste snippets</span></div>
+    <div class="kicker"><i></i> Claude Code · Latest · Nov 2 to Nov 9, 2026</div>
+    <h1>Claude Code <em>plugin</em> updates: <span style="color:var(--orange)">Nov 2 to 9</span></h1>
+    <p class="lede">Three Claude Code releases shipped between Monday Nov 2 and Monday Nov 9 (2.1.317, 2.1.318 and 2.1.319). I read every changelog entry and kept the ones that touch plugins. Five have a snippet you can copy. The rest are quick notes below.</p>
+    <div class="stats"><span class="chip"><b>3</b> releases read</span><span class="chip"><b>5</b> features</span><span class="chip"><b>7</b> copy-paste snippets</span></div>
   </header>
   <section class="tldr" aria-label="Ten second version">
     <h2>The 10-second version</h2>
-    <div class="tl"><span class="n">01</span><code>&quot;if&quot;: &quot;Bash(rm *)&quot;</code><button class="copy" type="button" data-t="&quot;if&quot;: &quot;Bash(rm *)&quot;">Copy</button></div>
-    <div class="tl"><span class="n">02</span><code>&quot;PreCompact&quot;: [ ... ]</code><button class="copy" type="button" data-t="&quot;PreCompact&quot;: [ ... ]">Copy</button></div>
-    <div class="tl"><span class="n">03</span><code>&quot;type&quot;: &quot;prompt&quot;</code><button class="copy" type="button" data-t="&quot;type&quot;: &quot;prompt&quot;">Copy</button></div>
-    <div class="tl"><span class="n">04</span><code>paths: &quot;api/**/*.ts&quot;</code><button class="copy" type="button" data-t="paths: &quot;api/**/*.ts&quot;">Copy</button></div>
-    <div class="tl"><span class="n">05</span><code>&quot;SubagentStop&quot;: [ ... ]</code><button class="copy" type="button" data-t="&quot;SubagentStop&quot;: [ ... ]">Copy</button></div>
+    <div class="tl"><span class="n">01</span><code>onFailure: &quot;block&quot;</code><button class="copy" type="button" data-t="onFailure: &quot;block&quot;">Copy</button></div>
+    <div class="tl"><span class="n">02</span><code>&quot;subagentStatusLine&quot;: { ... }</code><button class="copy" type="button" data-t="&quot;subagentStatusLine&quot;: { ... }">Copy</button></div>
+    <div class="tl"><span class="n">03</span><code>&quot;PostToolUse&quot;: [ ... ]</code><button class="copy" type="button" data-t="&quot;PostToolUse&quot;: [ ... ]">Copy</button></div>
+    <div class="tl"><span class="n">04</span><code>claude plugin update backend-standard</code><button class="copy" type="button" data-t="claude plugin update backend-standard">Copy</button></div>
+    <div class="tl"><span class="n">05</span><code>min: 0 and max: 0</code><button class="copy" type="button" data-t="min: 0
+max: 0">Copy</button></div>
   </section>
   <h2 class="toc-h">In this issue</h2>
   <nav class="toc" aria-label="Table of contents">
-    <a href="#f1"><svg><use href="#i-shield"/></svg><div><small>Hooks · Changed</small><span>Hook rules now cover the Monitor tool</span></div></a>
-    <a href="#f2"><svg><use href="#i-box"/></svg><div><small>Hooks · Fixed</small><span>Big PreCompact output no longer breaks compaction</span></div></a>
-    <a href="#f3"><svg><use href="#i-hook"/></svg><div><small>Hooks · Changed</small><span>Prompt hooks now wait their turn</span></div></a>
-    <a href="#f4"><svg><use href="#i-flask"/></svg><div><small>Skills · Fixed</small><span>Folder skills keep working after cd</span></div></a>
-    <a href="#f5"><svg><use href="#i-bolt"/></svg><div><small>Hooks · Fixed</small><span>SubagentStop hooks fire once</span></div></a>
-    <a href="#duet"><svg><use href="#i-bolt"/></svg><div><small>Also new</small><span>How I&#x27;m using Claude Duet</span></div></a>
+    <a href="#f1"><svg><use href="#i-shield"/></svg><div><small>Agent SDK · Added</small><span>Make a broken safety check fail closed</span></div></a>
+    <a href="#f2"><svg><use href="#i-bolt"/></svg><div><small>Plugins · Fixed</small><span>Plugin status lines can find their own scripts</span></div></a>
+    <a href="#f3"><svg><use href="#i-hook"/></svg><div><small>Hooks · Changed</small><span>After-tool hooks still run when you jump in</span></div></a>
+    <a href="#f4"><svg><use href="#i-box"/></svg><div><small>Plugins · Fixed</small><span>Plugin updates now bring new dependencies</span></div></a>
+    <a href="#f5"><svg><use href="#i-flask"/></svg><div><small>Evals · Fixed</small><span>Test that a tool is never called</span></div></a>
   </nav>
   <article class="feature" id="f1">
     <div class="fhead"><div class="icon"><svg><use href="#i-shield"/></svg></div>
-      <div><div class="cat">Hooks <span class="tag new">CHANGED · v2.1.314 · OCT 30</span></div><h3>Hook rules now cover the Monitor tool</h3></div></div>
-    <p class="hook">Could Claude slip a risky command past your hook by running it in the background?</p>
-    <div class="badges"><span class="badge"><b>Time</b> 10 min</span><span class="badge"><b>Level</b> intermediate</span><span class="badge"><b>For</b> plugin authors</span></div>
-    <div class="row"><b>What</b><div>The Monitor tool runs a command in the background and tells Claude what it prints. A hook can use an if rule, such as Bash(rm *), to run only for some commands. Before 2.1.314, hooks that match Bash did not run on commands the Monitor tool started. Now they do. Also, an if rule such as Monitor(tail *) now matches Monitor commands the same way Bash(tail *) matches Bash commands.</div></div>
-    <div class="row"><b>Why</b><div>One rule now guards both tools. Note that these hooks can block or ask on Monitor commands, but they cannot approve or change them.</div></div>
-    <div class="row"><b>Needs</b><div>Version 2.1.314 or later.</div></div>
-    <div class="path">Save in .claude/settings.json (the docs&#x27; example; the docs also give the block-rm.sh script):</div>
-    <div class="codebox"><pre>{
-  &quot;hooks&quot;: {
-    &quot;PreToolUse&quot;: [
-      {
-        &quot;matcher&quot;: &quot;Bash&quot;,
-        &quot;hooks&quot;: [
-          {
-            &quot;type&quot;: &quot;command&quot;,
-            &quot;if&quot;: &quot;Bash(rm *)&quot;,
-            &quot;command&quot;: &quot;${CLAUDE_PROJECT_DIR}/.claude/hooks/block-rm.sh&quot;,
-            &quot;args&quot;: []
-          }
-        ]
-      }
-    ]
+    <div><div class="cat">Agent SDK <span class="tag new">ADDED · v2.1.317 · NOV 3</span></div><h3>Make a broken safety check fail closed</h3></div></div>
+    <p class="hook">What if your safety check crashes? Does the risky action still run?</p>
+    <div class="badges"><span class="badge"><b>Time</b> 15 min</span><span class="badge"><b>Level</b> intermediate</span><span class="badge"><b>For</b> SDK builders</span></div>
+    <div class="row"><b>What</b><div>A hook is a small check that runs at a set moment, like before Claude runs a command. If an Agent SDK hook callback crashed, the action used to go ahead. Since 2.1.317, you can set onFailure to &quot;block&quot; on the matcher. Then a crash stops the action instead.</div></div>
+    <div class="row"><b>Why</b><div>A broken guard should fail closed, not open. This matters most for jobs that run with no one watching. Let the error reach the SDK: a callback that catches its own error and returns {} does not count as failing.</div></div>
+    <div class="row"><b>Needs</b><div>Version 2.1.317. The docs say TypeScript Agent SDK v0.3.317 or later, or Python Agent SDK v0.2.177 or later. Hooks in settings files have had onFailure since v2.1.295 (docs).</div></div>
+    <div class="path">In your TypeScript Agent SDK app (the docs&#x27; example; checkPolicy is your own check):</div>
+    <div class="codebox"><pre>import type { Options } from &quot;@anthropic-ai/claude-agent-sdk&quot;;
+
+const options: Options = {
+  hooks: {
+    PreToolUse: [{ matcher: &quot;Bash&quot;, hooks: [checkPolicy], onFailure: &quot;block&quot; }]
   }
-}</pre></div>
-    <div class="check"><b>Did it work?</b> Ask Claude to run rm -rf on a test folder. The hook should block it, and it now also checks commands that the Monitor tool starts.</div>
+};</pre></div>
+    <div class="check"><b>Did it work?</b> Make checkPolicy throw an error, then ask Claude to run a Bash command. The tool result should include: failed; blocking because onFailure is &quot;block&quot;.</div>
   </article>
   <article class="feature" id="f2">
-    <div class="fhead"><div class="icon"><svg><use href="#i-box"/></svg></div>
-      <div><div class="cat">Hooks <span class="tag new">FIXED · v2.1.314 · OCT 30</span></div><h3>Big PreCompact output no longer breaks compaction</h3></div></div>
-    <p class="hook">Did a chatty hook make Claude fail to shrink a long chat?</p>
-    <div class="badges"><span class="badge"><b>Time</b> 5 min</span><span class="badge"><b>Level</b> beginner</span><span class="badge"><b>For</b> plugin authors</span></div>
-    <div class="row"><b>What</b><div>Compaction is when Claude sums up a long chat to make room. A PreCompact hook runs just before that. Before 2.1.314, a PreCompact hook that printed a lot of text could make compaction fail or repeat. Now each hook&#x27;s output is cut at 10,000 characters.</div></div>
-    <div class="row"><b>Why</b><div>Logging and backup hooks can run before compaction without breaking it. Keep what Claude must see under the 10,000 character cap.</div></div>
-    <div class="row"><b>Needs</b><div>Version 2.1.314 or later.</div></div>
-    <div class="path">Save in .claude/settings.json (my example; the PreCompact event and its manual matcher are from the docs):</div>
+    <div class="fhead"><div class="icon"><svg><use href="#i-bolt"/></svg></div>
+    <div><div class="cat">Plugins <span class="tag new">FIXED · v2.1.319 · NOV 6</span></div><h3>Plugin status lines can find their own scripts</h3></div></div>
+    <p class="hook">Want your plugin to draw its own row for each helper agent?</p>
+    <div class="badges"><span class="badge"><b>Time</b> 15 min</span><span class="badge"><b>Level</b> intermediate</span><span class="badge"><b>For</b> plugin authors</span></div>
+    <div class="row"><b>What</b><div>A subagent is a helper Claude starts for a side job. The agent panel shows one row for each. A plugin can set subagentStatusLine in its settings.json to draw those rows with its own script. ${CLAUDE_PLUGIN_ROOT} stands for the folder where the plugin lives. Before 2.1.319, it was not filled in for this command. Now it is.</div></div>
+    <div class="row"><b>Why</b><div>You can ship the script inside the plugin, so users do not copy it anywhere. The script reads the rows as JSON and prints one JSON line per row it wants to change (see the docs).</div></div>
+    <div class="row"><b>Needs</b><div>Version 2.1.319 or later. Only two settings keys work from a plugin: agent and subagentStatusLine (docs).</div></div>
+    <div class="path">Save as settings.json at your plugin&#x27;s root (my example; the shape is from the docs):</div>
     <div class="codebox"><pre>{
-  &quot;hooks&quot;: {
-    &quot;PreCompact&quot;: [
-      {
-        &quot;matcher&quot;: &quot;manual&quot;,
-        &quot;hooks&quot;: [
-          {
-            &quot;type&quot;: &quot;command&quot;,
-            &quot;command&quot;: &quot;echo \&quot;PreCompact ran\&quot; &gt;&gt; ~/precompact.log&quot;
-          }
-        ]
-      }
-    ]
+  &quot;subagentStatusLine&quot;: {
+    &quot;type&quot;: &quot;command&quot;,
+    &quot;command&quot;: &quot;\&quot;${CLAUDE_PLUGIN_ROOT}/scripts/subagent-row.sh\&quot;&quot;
   }
 }</pre></div>
-    <div class="check"><b>Did it work?</b> Run /compact, then look in ~/precompact.log for the line PreCompact ran.</div>
+    <div class="check"><b>Did it work?</b> Ask Claude to use a subagent. Its row in the agent panel should show what your script prints.</div>
   </article>
   <article class="feature" id="f3">
     <div class="fhead"><div class="icon"><svg><use href="#i-hook"/></svg></div>
-      <div><div class="cat">Hooks <span class="tag new">CHANGED · v2.1.312 · OCT 27</span></div><h3>Prompt hooks now wait their turn</h3></div></div>
-    <p class="hook">What happens when your plugins fire lots of AI-checked hooks at once?</p>
-    <div class="badges"><span class="badge"><b>Time</b> 10 min</span><span class="badge"><b>Level</b> intermediate</span><span class="badge"><b>For</b> plugin authors</span></div>
-    <div class="row"><b>What</b><div>A hook is a small job that runs at a set moment, like when Claude stops. A prompt hook asks a Claude model to judge that moment and answer yes or no. An agent hook does the same job with a helper that can read files. Since 2.1.312, one session runs at most 24 of these at a time, helpers included. At most 12 more can run once they have waited past their time limit. A timeout under 1 second now counts as 1 second.</div></div>
-    <div class="row"><b>Why</b><div>A pile of prompt hooks from many plugins can no longer flood your session with model calls.</div></div>
-    <div class="row"><b>Needs</b><div>Version 2.1.312 for the new limit. The hooks docs name no version for prompt hooks themselves.</div></div>
+    <div><div class="cat">Hooks <span class="tag new">CHANGED · v2.1.319 · NOV 6</span></div><h3>After-tool hooks still run when you jump in</h3></div></div>
+    <p class="hook">Does your formatter skip a file when you type mid-task?</p>
+    <div class="badges"><span class="badge"><b>Time</b> 5 min</span><span class="badge"><b>Level</b> beginner</span><span class="badge"><b>For</b> plugin authors</span></div>
+    <div class="row"><b>What</b><div>A PostToolUse hook runs after a tool, like after Claude edits a file. Before 2.1.319, these hooks did not start if you broke into the turn with a new message, and a running hook was stopped. Now, if you send with Ctrl+Enter and the tool finishes, the hooks run on its result. They get up to 10 seconds.</div></div>
+    <div class="row"><b>Why</b><div>Format and lint hooks no longer miss edits just because you spoke up. Esc still cancels them at once.</div></div>
+    <div class="row"><b>Needs</b><div>Version 2.1.319 or later. A hook that needs more than 10 seconds can use async: true, but then it cannot block or change the result (docs).</div></div>
     <div class="path">Save as hooks/hooks.json in your plugin (the docs&#x27; example):</div>
     <div class="codebox"><pre>{
   &quot;hooks&quot;: {
-    &quot;Stop&quot;: [
+    &quot;PostToolUse&quot;: [
       {
+        &quot;matcher&quot;: &quot;Write|Edit&quot;,
         &quot;hooks&quot;: [
           {
-            &quot;type&quot;: &quot;prompt&quot;,
-            &quot;prompt&quot;: &quot;Evaluate if Claude should stop: $ARGUMENTS. Check if all tasks are complete.&quot;
+            &quot;type&quot;: &quot;command&quot;,
+            &quot;command&quot;: &quot;\&quot;${CLAUDE_PLUGIN_ROOT}/scripts/format.sh\&quot;&quot;
           }
         ]
       }
     ]
   }
 }</pre></div>
-    <div class="check"><b>Did it work?</b> Run /reload-plugins, then give Claude a small task. Before it stops, the hook checks that the work is done.</div>
+    <div class="check"><b>Did it work?</b> Ask Claude to edit a file. While it works, type a message and press Ctrl+Enter. The format script should still run on that file.</div>
   </article>
   <article class="feature" id="f4">
-    <div class="fhead"><div class="icon"><svg><use href="#i-flask"/></svg></div>
-      <div><div class="cat">Skills <span class="tag new">FIXED · v2.1.312 · OCT 27</span></div><h3>Folder skills keep working after cd</h3></div></div>
-    <p class="hook">Did a skill go quiet after Claude moved into a deeper folder?</p>
-    <div class="badges"><span class="badge"><b>Time</b> 5 min</span><span class="badge"><b>Level</b> beginner</span><span class="badge"><b>For</b> skill authors</span></div>
-    <div class="row"><b>What</b><div>A skill is a saved set of instructions Claude follows. The paths field tells Claude to load a skill only for files that match a pattern. Before 2.1.312, these skills, and skills kept in a subfolder, were not found after a Bash cd deeper into a git repo. That is fixed.</div></div>
-    <div class="row"><b>Why</b><div>Skills tied to folders keep showing up in big repos.</div></div>
-    <div class="row"><b>Needs</b><div>Version 2.1.312. Patterns are read from Claude&#x27;s current working folder (docs).</div></div>
-    <div class="path">Save as .claude/skills/api-style/SKILL.md (my example; the paths field is from the docs):</div>
-    <div class="codebox"><pre>---
-name: api-style
-description: Style rules for files in the api folder
-paths: &quot;api/**/*.ts&quot;
----
-
-Follow our API style rules when you edit these files.</pre></div>
-    <div class="check"><b>Did it work?</b> Have Claude cd into a deeper folder, then edit a file under api/. The skill should still load.</div>
+    <div class="fhead"><div class="icon"><svg><use href="#i-box"/></svg></div>
+    <div><div class="cat">Plugins <span class="tag new">FIXED · v2.1.319 · NOV 6</span></div><h3>Plugin updates now bring new dependencies</h3></div></div>
+    <p class="hook">Added a plugin to your team&#x27;s bundle, but nobody got it?</p>
+    <div class="badges"><span class="badge"><b>Time</b> 10 min</span><span class="badge"><b>Level</b> intermediate</span><span class="badge"><b>For</b> platform teams</span></div>
+    <div class="row"><b>What</b><div>A dependency is another plugin that your plugin needs. A bundle is a plugin that mostly lists dependencies, so one install brings a whole set. Before 2.1.319, claude plugin update, the &quot;Update now&quot; button in /plugin, and background auto-update did not install a dependency that a new version added. Now they do.</div></div>
+    <div class="row"><b>Why</b><div>A team can add a plugin to its bundle, publish a new version, and know people get it on update.</div></div>
+    <div class="row"><b>Needs</b><div>Version 2.1.319 or later. A version range such as ^3.0 needs the dependency&#x27;s maintainer to tag releases (docs).</div></div>
+    <div class="path">The bundle&#x27;s .claude-plugin/plugin.json (the docs&#x27; example):</div>
+    <div class="codebox"><pre>{
+  &quot;name&quot;: &quot;backend-standard&quot;,
+  &quot;version&quot;: &quot;1.0.0&quot;,
+  &quot;description&quot;: &quot;Standard plugin set for backend engineers&quot;,
+  &quot;dependencies&quot;: [
+    &quot;secrets-vault&quot;,
+    &quot;deploy-kit&quot;,
+    { &quot;name&quot;: &quot;db-migrate&quot;, &quot;version&quot;: &quot;^3.0&quot; },
+    &quot;oncall-runbook&quot;
+  ]
+}</pre></div>
+    <div class="path">Then in your shell, and run /reload-plugins in an open session (from the docs):</div>
+    <div class="codebox"><pre>claude plugin update backend-standard</pre></div>
+    <div class="check"><b>Did it work?</b> Run /plugin and look for the newly added dependency among your installed plugins.</div>
   </article>
   <article class="feature" id="f5">
-    <div class="fhead"><div class="icon"><svg><use href="#i-bolt"/></svg></div>
-      <div><div class="cat">Hooks <span class="tag new">FIXED · v2.1.311 · OCT 26</span></div><h3>SubagentStop hooks fire once</h3></div></div>
-    <p class="hook">Did your clean-up hook run again and again while a helper was still busy?</p>
-    <div class="badges"><span class="badge"><b>Time</b> 10 min</span><span class="badge"><b>Level</b> intermediate</span><span class="badge"><b>For</b> plugin authors</span></div>
-    <div class="row"><b>What</b><div>A subagent is a helper Claude starts for one job. A SubagentStop hook runs when that helper finishes. Before 2.1.311, these hooks ran about twice a minute for each helper that was still running. Now they run once, when it finishes.</div></div>
-    <div class="row"><b>Why</b><div>Clean-up scripts, alerts and logs fire one time per helper, not over and over.</div></div>
-    <div class="row"><b>Needs</b><div>Version 2.1.311 or later.</div></div>
-    <div class="path">In .claude/settings.json, or hooks/hooks.json in a plugin (the docs&#x27; example; you write the two scripts):</div>
-    <div class="codebox"><pre>{
-  &quot;hooks&quot;: {
-    &quot;SubagentStart&quot;: [
-      {
-        &quot;matcher&quot;: &quot;db-agent&quot;,
-        &quot;hooks&quot;: [
-          { &quot;type&quot;: &quot;command&quot;, &quot;command&quot;: &quot;./scripts/setup-db-connection.sh&quot; }
-        ]
-      }
-    ],
-    &quot;SubagentStop&quot;: [
-      {
-        &quot;hooks&quot;: [
-          { &quot;type&quot;: &quot;command&quot;, &quot;command&quot;: &quot;./scripts/cleanup-db-connection.sh&quot; }
-        ]
-      }
-    ]
-  }
-}</pre></div>
-    <div class="check"><b>Did it work?</b> Ask Claude to use a subagent for a small job. The clean-up script should run one time, when the helper is done.</div>
+    <div class="fhead"><div class="icon"><svg><use href="#i-flask"/></svg></div>
+    <div><div class="cat">Evals <span class="tag new">FIXED · v2.1.319 · NOV 6</span></div><h3>Test that a tool is never called</h3></div></div>
+    <p class="hook">How do you prove your plugin did not run a command?</p>
+    <div class="badges"><span class="badge"><b>Time</b> 20 min</span><span class="badge"><b>Level</b> intermediate</span><span class="badge"><b>For</b> plugin authors</span></div>
+    <div class="row"><b>What</b><div>claude plugin eval runs your plugin against test cases and scores them. A grader is one pass or fail check. A tool_used grader counts calls to a tool, and its min is 1 unless you set it. Before 2.1.319, eval warnings could suggest max: 0 for a tool that must not be called. With min still at 1, that check could never pass. The bad tip is gone. The docs say to set both min: 0 and max: 0.</div></div>
+    <div class="row"><b>Why</b><div>&quot;Never do this&quot; checks are how you test a plugin&#x27;s safety rules.</div></div>
+    <div class="row"><b>Needs</b><div>Version 2.1.319 for the fix. Git 2.31 or later if git is installed (docs). Eval runs use your plan&#x27;s usage or your API bill.</div></div>
+    <div class="path">Save as evals/first-case/graders/no-bash.md (my example; the fields are from the docs):</div>
+    <div class="codebox"><pre>---
+type: tool_used
+tool: Bash
+min: 0
+max: 0
+---</pre></div>
+    <div class="path">Then from your plugin&#x27;s root folder (from the docs):</div>
+    <div class="codebox"><pre>claude plugin eval .</pre></div>
+    <div class="check"><b>Did it work?</b> The report should show this grader pass on runs where Claude made no Bash call.</div>
   </article>
-  <section class="band duet" id="duet">
-    <h2>Also new: how I&#x27;m using Claude Duet</h2>
-    <p>Anthropic pitches Claude Duet as an agent that keeps working when you stop. It checks your apps, sends a morning brief, and pings you only when something needs you. Most reviews stop at the morning brief. Some testers even say they forgot to use it. I went the other way. I gave it the night shift.</p>
-    <ul class="src">
-      <li><b>It watches my automations, not just my inbox.</b> I run scheduled jobs in Cowork. Duet tells me how each one went. Before, I only found out a job failed when I logged in.</li>
-      <li><b>It fixed my podcast while I slept.</b> My daily AI news show, AI At The Edge, kept landing about six hours late, and some days I had to start it by hand. Duet sent agents to dig in. They found GitHub was starting my scheduled run hours late. We moved the run to 12:13 AM. The next episode published on its own at 6:19 AM.</li>
-      <li><b>One text, done by morning.</b> I asked for 10 minute episodes instead of 5. By morning the change was in.</li>
-      <li><b>It runs this newsletter.</b> A weekly routine reads the changelog, writes these cards and builds the cover. I review it and say go. It also built the workflow that turns this section into an AI video of me.</li>
-      <li><b>It stays quiet.</b> I keep one channel per subject. Routines post only when something needs me. It drafts my email replies and my weekly church drafts, and I send them myself.</li>
-    </ul>
-    <p>The honest part: it can be slow, and it checks in every few hours, not every minute. That is fine for night shift work.</p>
-    <p style="margin:0"><b>If you had an agent on the night shift, what job would you hand it first?</b></p>
-  </section>
   <section class="band">
     <h2>Also this week</h2>
     <ul class="src">
-      <li><b>2.1.316:</b> plugin MCP <code>headersHelper</code> scripts got a broken <code>CLAUDE_PLUGIN_ROOT</code> and server address when a variable with a credential-like name was set to a switch value such as <code>1</code>. Fixed.</li>
-      <li><b>2.1.316:</b> PowerShell hooks now block on exit code 2 even when the command starts with a type cast, <code>param</code>, <code>using</code> or an attribute.</li>
-      <li><b>2.1.314:</b> scheduled tasks that run in Anthropic&#x27;s cloud now load the plugins turned on for your claude.ai account.</li>
-      <li><b>2.1.314:</b> switching models is no longer refused under managed plugin settings when one of your own <code>--plugin-dir</code> or <code>--plugin-url</code> plugins has a broken manifest or fails to download.</li>
-      <li><b>2.1.314:</b> in Cowork cloud sessions with auto mode, a hook that allows an MCP tool call now counts as no answer. The safety check or a permission prompt decides.</li>
-      <li><b>2.1.314:</b> the <code>~/.claude/skills/.trash</code> and <code>~/.claude/plugins/.trash</code> folders now hold about 1024 entries each, and the skill file watcher no longer checks every removed skill.</li>
-      <li><b>2.1.314:</b> a session that starts with a skill now gets its title from that skill. The bundled dataviz and <code>/claude-api</code> skills were also updated.</li>
-      <li><b>2.1.314:</b> MCP fixes: servers that also work signed out are used signed out when their saved sign-in stops working, and <code>claude mcp logout</code> no longer reports success when the sign-in was not removed.</li>
-      <li><b>2.1.312:</b> OpenTelemetry now shows the real name of remote MCP servers that official-marketplace plugins add, not &quot;custom&quot;.</li>
-      <li><b>2.1.312:</b> a command with a bad name no longer stops every other command from loading. Before, that could leave <code>claude -p</code> with no output.</li>
-      <li><b>2.1.311:</b> subagents can now use MCP tools from servers that finish connecting after the subagent starts.</li>
-      <li><b>2.1.311:</b> Cowork cloud sessions no longer lose their connectors after a restart when a plugin or your settings names an <code>agent</code>.</li>
+      <li><b>2.1.319:</b> <code>--add-dir</code> folders now register plugin marketplaces only after you accept that folder's own trust dialog.</li>
+      <li><b>2.1.319:</b> a project's settings files or a plugin can no longer switch auto mode's server-side check back on once you switched it off outside the project.</li>
+      <li><b>2.1.319:</b> the Monitor tool's WebSocket watch now follows your Bash rules: a deny rule refuses it, and under an ask rule it no longer skips the prompt.</li>
+      <li><b>2.1.319:</b> with the Bash sandbox on, skills in <code>.claude/skills</code> folders below your starting folder load only if you start there or <code>/cd</code> there.</li>
+      <li><b>2.1.319:</b> MCP servers, including ones plugins add, can run a tool call as a task. Claude Code moves it to the background and reports the result when it ends.</li>
+      <li><b>2.1.319:</b> deny and ask rules and hook matchers written with a claude.ai connector's terminal name now work in Claude Desktop, once Desktop includes this version.</li>
+      <li><b>2.1.319:</b> on self-hosted runners, <code>--trust-workspace false</code> now also stops hooks in the repo's settings files and skills.</li>
+      <li><b>2.1.318:</b> <code>claude plugin validate</code> no longer passes a custom-named marketplace file that <code>claude plugin marketplace add</code> rejects.</li>
+      <li><b>2.1.318:</b> <code>claude plugin</code> commands no longer exit before a slow token refresh is saved, which could sign you out.</li>
+      <li><b>2.1.318:</b> variables a <code>Setup</code> hook writes to <code>CLAUDE_ENV_FILE</code> now reach the Bash tool in cloud sessions.</li>
+      <li><b>2.1.317:</b> exiting no longer asks about running background work just because a plugin monitor is running.</li>
+      <li><b>2.1.317:</b> headless sessions with many plugins that register commands no longer use lots of memory or start slowly.</li>
+      <li><b>2.1.317:</b> cloud sessions no longer call a working claude.ai connector broken when a synced plugin includes the same server.</li>
     </ul>
   </section>
   <section class="band">
     <h2>How to install a plugin</h2>
-    <p>Official store plugins use this form, shown in Anthropic's docs. In a session it opens the plugin's details so you can review it and pick a scope first.</p>
+    <p>Official store plugins use this form, shown in Anthropic&#x27;s docs. In a session it opens the plugin&#x27;s details so you can review it and pick a scope first.</p>
     <div class="codebox"><pre>/plugin install commit-commands@claude-plugins-official</pre></div>
     <p class="fine">To add another store first, run <code>/plugin marketplace add &lt;owner&gt;/&lt;repo&gt;</code>. Then use <code>/plugin install &lt;plugin&gt;@&lt;marketplace&gt;</code>. After you change a plugin, run <code>/reload-plugins</code>.</p>
   </section>
   <section class="band safe">
     <h2>Stay safe</h2>
-    <p style="margin:0">Plugins run code on your machine. A hook runs every time its moment comes, and prompt and agent hooks send your session&#x27;s details to a model. Hooks can block a Monitor command but cannot approve it, so keep your deny rules too. Read what a plugin does before you install it.</p>
+    <p style="margin:0">Plugins run code on your machine. Hooks and status line scripts run with your own user permissions. onFailure &quot;block&quot; only helps if the error reaches the SDK, so do not hide errors inside a guard. Read what a plugin and its dependencies do before you install them.</p>
   </section>
   <section class="ask">
     <h2>Which of these would save <em>your team</em> the most time?</h2>
     <p class="blurb">Tell me in the comments.</p>
   </section>
   <section class="fine">
-    <p>Covers releases dated Mon Oct 26 to Sun Nov 1, 2026 (2.1.311, 2.1.312, 2.1.314 and 2.1.316). Last week&#x27;s issue already covered the 2.1.311 plugin folder fix, so it is not repeated. Time and level badges are my own estimates. I did not run these snippets myself. They come from Anthropic&#x27;s Claude Code changelog and docs, except the PreCompact hook and the skill file, which are my examples. The Claude Duet section is about my own use, not the changelog.</p>
+    <p>Covers releases dated Mon Nov 2 to Mon Nov 9, 2026 (2.1.317, 2.1.318 and 2.1.319). Time and level badges are my own estimates. I did not run these snippets myself. They come from Anthropic&#x27;s Claude Code changelog and docs, except the status line settings and the eval grader, which are my examples.</p>
     <b>Sources</b>
     <ul class="src">
-      <li><a href="https://code.claude.com/docs/en/changelog">Claude Code changelog (2.1.311 to 2.1.316)</a></li>
-      <li><a href="https://code.claude.com/docs/en/hooks">Hooks reference (if rules, PreCompact, prompt hooks, output cap)</a></li>
-      <li><a href="https://code.claude.com/docs/en/tools-reference">Tools reference (Monitor tool)</a></li>
-      <li><a href="https://code.claude.com/docs/en/skills">Extend Claude with skills (paths field)</a></li>
-      <li><a href="https://code.claude.com/docs/en/sub-agents">Subagents (SubagentStop hook example)</a></li>
-      <li><a href="https://code.claude.com/docs/en/plugins/components">Add components to a plugin (hooks/hooks.json)</a></li>
+      <li><a href="https://code.claude.com/docs/en/changelog">Claude Code changelog (2.1.317 to 2.1.319)</a></li>
+      <li><a href="https://code.claude.com/docs/en/agent-sdk/hooks">Agent SDK hooks (block the action when a callback fails)</a></li>
+      <li><a href="https://code.claude.com/docs/en/statusline">Status line (subagent status lines)</a></li>
+      <li><a href="https://code.claude.com/docs/en/plugins/components">Add components to a plugin (hooks, default settings)</a></li>
+      <li><a href="https://code.claude.com/docs/en/hooks">Hooks reference (PostToolUse after an interrupt)</a></li>
+      <li><a href="https://code.claude.com/docs/en/plugins/dependencies">Plugin dependencies (bundles)</a></li>
+      <li><a href="https://code.claude.com/docs/en/plugin-evals">Plugin evals (tool_used grader)</a></li>
       <li><a href="https://code.claude.com/docs/en/discover-plugins">Discover and install plugins</a></li>
     </ul>
   </section>
@@ -330,6 +296,5 @@ document.querySelectorAll('button.copy[data-t]').forEach(function(b){
   wire(b,function(){return b.getAttribute('data-t')},function(){return b.previousElementSibling});
 });
 </script>
-
 </body>
 </html>
