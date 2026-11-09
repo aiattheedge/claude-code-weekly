@@ -1,0 +1,44 @@
+[
+  {
+    "html": "cover.html",
+    "out": "images/2026-11-09/cover.png",
+    "width": 1200,
+    "height": 627
+  },
+  {
+    "html": "og.html",
+    "out": "og-cover-v7.png",
+    "width": 1200,
+    "height": 630
+  },
+  {
+    "html": "banner-1.html",
+    "out": "images/2026-11-09/banner-1.png",
+    "width": 1200,
+    "height": 360
+  },
+  {
+    "html": "banner-2.html",
+    "out": "images/2026-11-09/banner-2.png",
+    "width": 1200,
+    "height": 360
+  },
+  {
+    "html": "banner-3.html",
+    "out": "images/2026-11-09/banner-3.png",
+    "width": 1200,
+    "height": 360
+  },
+  {
+    "html": "banner-4.html",
+    "out": "images/2026-11-09/banner-4.png",
+    "width": 1200,
+    "height": 360
+  },
+  {
+    "html": "banner-5.html",
+    "out": "images/2026-11-09/banner-5.png",
+    "width": 1200,
+    "height": 360
+  }
+]
