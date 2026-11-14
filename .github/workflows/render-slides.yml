@@ -1,0 +1,51 @@
+name: Render slides
+# Renders one video's slides (video/slides/<date>/jobs.json) with the same Chromium the video
+# workflow uses, and saves the PNGs to the private draft release "slide-renders". No HeyGen spend.
+on:
+  push:
+    branches: [main]
+    paths: ["video/slides/*/slide-*.html", "video/slides/*/slides.css"]
+permissions:
+  contents: write
+concurrency:
+  group: render-slides
+  cancel-in-progress: false
+jobs:
+  slides:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Pick slide folder
+        id: pick
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          dirs=$(git diff --name-only "$BEFORE" "$GITHUB_SHA" | grep -E '^video/slides/[0-9-]+/' | cut -d/ -f1-3 | sort -u)
+          count=$(printf '%s\n' "$dirs" | grep -c . || true)
+          if [ "$count" -ne 1 ]; then echo "::error::Change one slide folder per push (found $count)."; exit 1; fi
+          echo "dir=$dirs" >> "$GITHUB_OUTPUT"; echo "date=$(basename "$dirs")" >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Render
+        env:
+          RENDER_DIR: ${{ steps.pick.outputs.dir }}
+        run: |
+          npm install --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+          node scripts/render.js
+      - name: Save to the draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DATE: ${{ steps.pick.outputs.date }}
+        run: |
+          set -euo pipefail
+          mkdir -p upload
+          for f in out/slides/"$DATE"/*.png; do cp "$f" "upload/slides-$DATE-$(basename "$f")"; done
+          if ! gh release view slide-renders >/dev/null 2>&1; then
+            gh release create slide-renders --draft --title "Slide renders" --notes "Rendered video slides. Draft, private."
+          fi
+          gh release upload slide-renders upload/*.png --clobber
