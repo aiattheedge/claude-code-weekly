@@ -61,8 +61,11 @@ def find_voice(voices: list, name: str, preferred_id: str = "") -> dict:
     if len(matches) > 1 and preferred_id:
         matches = [v for v in matches if v.get("voice_id") == preferred_id] or matches
     if len(matches) != 1:
-        raise HeyGenError(f"Expected one voice named {name!r}, found {len(matches)}: "
-                          f"{[(v.get('name'), v.get('voice_id'), v.get('type') or v.get('engine')) for v in matches]}")
+        first = name.split()[0].lower()
+        near = [v for v in voices if first in (v.get("name") or "").lower() or v.get("voice_id") == preferred_id
+                or v.get("type") in ("private", "custom", "clone") or v.get("is_custom")]
+        raise HeyGenError(f"Expected one voice named {name!r}, found {len(matches)}. Look default voice: "
+                          f"{preferred_id!r}. Voices like it: {near[:40]}")
     return matches[0]
 
 
@@ -74,17 +77,23 @@ def estimate_cost(text: str, engine: str, prices: dict, words_per_minute: int) -
 
 
 def list_voices(client: HeyGenClient) -> list:
-    """Private and public voices. Tries the v3 list first, then v2."""
+    """Private and public voices, every page. Tries the v3 list first, then v2."""
     errors = []
     for path in ("/v3/voices", "/v2/voices"):
+        voices, token = [], None
         try:
-            resp = client._request("GET", path)
+            while True:
+                resp = client._request("GET", path, query={"limit": 100, "token": token} if path.startswith("/v3") else None)
+                data = resp.get("data")
+                voices.extend((data.get("voices") if isinstance(data, dict) else data) or [])
+                token = resp.get("next_token") or (data.get("next_token") if isinstance(data, dict) else None)
+                if not token or not (resp.get("has_more") or (isinstance(data, dict) and data.get("has_more"))):
+                    break
         except HeyGenError as err:
             errors.append(str(err))
             continue
-        data = resp.get("data")
-        voices = data.get("voices") if isinstance(data, dict) else data
         if voices:
+            print(f"Listed {len(voices)} voices from {path}")
             return voices
     raise HeyGenError(f"Could not list voices: {errors}")
 
