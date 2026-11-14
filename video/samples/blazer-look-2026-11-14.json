@@ -1,0 +1,9 @@
+{
+  "note": "One API test clip of the blazer look and HeyGen voice before the Nov 16 render. Ian asked for this test on Nov 14.",
+  "mode": "render",
+  "look_name": "Professional in blue blazer",
+  "voice_name": "Ian Michel",
+  "engines": ["avatar_iv", "avatar_v"],
+  "max_cost_usd": 3.0,
+  "text": "Hi, I'm Ian. Think about your last big meeting. Three decisions, five action items, and a week later nobody agrees on what was said. That's why transcription is so valuable."
+}

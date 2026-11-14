@@ -1,0 +1,71 @@
+name: HeyGen sample
+# Makes one short HeyGen test clip from a request in video/samples/*.json, to check a look and voice
+# before a full render. Runs only when a request is pushed to main. The script refuses to render if the
+# estimate is over the request's max_cost_usd. The clip goes only to a private draft release
+# (no run artifact, since artifacts on a public repo can be downloaded by any GitHub user).
+on:
+  push:
+    branches: [main]
+    paths: ["video/samples/*.json"]
+permissions:
+  contents: write
+concurrency:
+  group: heygen-sample
+  cancel-in-progress: false
+jobs:
+  sample:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Pick request
+        id: pick
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          files=$(git diff --name-only --diff-filter=AM "$BEFORE" "$GITHUB_SHA" -- 'video/samples/*.json' 2>/dev/null || git show --name-only --pretty=format: HEAD -- 'video/samples/*.json')
+          count=$(printf '%s\n' "$files" | grep -c . || true)
+          if [ "$count" -ne 1 ]; then echo "::error::Push exactly one video/samples/*.json (found $count)."; exit 1; fi
+          mode=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1])).get("mode","dry-run"))' "$files")
+          echo "request=$files" >> "$GITHUB_OUTPUT"
+          echo "mode=$mode" >> "$GITHUB_OUTPUT"
+          echo "name=$(basename "$files" .json)" >> "$GITHUB_OUTPUT"
+
+      - name: Unit tests
+        run: python3 -m unittest tests.test_sample -v
+
+      - name: Make the clip
+        env:
+          HEYGEN_API_KEY: ${{ secrets.HEYGEN_API_KEY }}
+          REQUEST: ${{ steps.pick.outputs.request }}
+          MODE: ${{ steps.pick.outputs.mode }}
+        run: |
+          if [ "$MODE" = "render" ]; then
+            python3 scripts/video/heygen_sample.py "$REQUEST" "$RUNNER_TEMP/sample"
+          else
+            python3 scripts/video/heygen_sample.py "$REQUEST" "$RUNNER_TEMP/sample" --dry-run
+          fi
+
+      - name: Save to the private draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NAME: ${{ steps.pick.outputs.name }}
+        run: |
+          set -euo pipefail
+          release=heygen-samples
+          if ! gh release view "$release" >/dev/null 2>&1; then
+            gh release create "$release" --draft --title "HeyGen test clips (private draft)" \
+              --notes "Private draft: short HeyGen test clips. Do not publish."
+          elif [ "$(gh release view "$release" --json isDraft --jq .isDraft)" != "true" ]; then
+            gh release edit "$release" --draft=true
+          fi
+          dir="$RUNNER_TEMP/sample"
+          files=("$dir/sample.json")
+          cp "$dir/sample.json" "$dir/$NAME.json"; files=("$dir/$NAME.json")
+          if [ -f "$dir/sample.mp4" ]; then cp "$dir/sample.mp4" "$dir/$NAME.mp4"; files+=("$dir/$NAME.mp4"); fi
+          gh release upload "$release" "${files[@]}" --clobber
+          echo "- Saved ${files[*]##*/} to draft release \`$release\`" >> "$GITHUB_STEP_SUMMARY"
