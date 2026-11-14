@@ -1,0 +1,42 @@
+{
+  "note": "Fifth API test: sweater look, pitch +1, name written normally, pronunciation from a brand glossary (Ian OK'd saving the list, Nov 14).",
+  "mode": "render",
+  "look_name": "Glasses-wearing professional in sweater",
+  "group_id": "3b139202312a472babc5d62550507c96",
+  "voice_name": "Ian Michel",
+  "voice_id": "e6e3598e30584c289fa8ac457ce5db5d",
+  "voice_settings": {
+    "engine_settings": {
+      "engine_type": "heygen_voice",
+      "pitch": 1.0
+    }
+  },
+  "glossary": {
+    "name": "AI At The Edge pronunciations",
+    "terms_ipa": [
+      {
+        "term": "Ian",
+        "ipa": "/ˈiːən/"
+      },
+      {
+        "term": "Michel",
+        "ipa": "/miˈʃɛl/"
+      }
+    ],
+    "terms_respelled": [
+      {
+        "term": "Ian",
+        "pronunciation": "ee-in"
+      },
+      {
+        "term": "Michel",
+        "pronunciation": "mee-shell"
+      }
+    ]
+  },
+  "engines": [
+    "avatar_iv"
+  ],
+  "max_cost_usd": 1.0,
+  "text": "Hi, I'm Ian Michel. Think about your last big meeting. Three decisions, five action items, and a week later nobody agrees on what was said. That's why transcription is so valuable."
+}

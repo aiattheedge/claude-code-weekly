@@ -125,6 +125,45 @@ def private_voices(client: HeyGenClient, default_id: str) -> list:
     return list(found.values())
 
 
+def merge_terms(existing: list, new: list) -> list:
+    """Existing glossary terms with any of the new terms replaced (matched ignoring case), then the new ones."""
+    names = {t["term"].lower() for t in new}
+    kept = [{k: v for k, v in t.items() if k in ("term", "pronunciation", "ipa", "pronunciation_language") and v}
+            for t in existing if (t.get("term") or "").lower() not in names]
+    return kept + new
+
+
+def ensure_glossary(client: HeyGenClient, spec: dict) -> dict:
+    """Save the pronunciation terms to the workspace's one brand glossary (creating it if there is none).
+    Tries the IPA terms first; an account without IPA access answers 400, so then uses the respellings."""
+    listed = client._request("GET", "/v3/brand-glossaries", query={"limit": 100}).get("data") or []
+    existing = listed[0] if listed else None
+    last = None
+    for kind in ("terms_ipa", "terms_respelled"):
+        terms = spec.get(kind)
+        if not terms:
+            continue
+        try:
+            if existing:
+                gid = existing["brand_glossary_id"]
+                current = client._request("GET", f"/v3/brand-glossaries/{gid}").get("data") or {}
+                body = {"terms": merge_terms(current.get("terms") or [], terms)}
+                data = client._request("PATCH", f"/v3/brand-glossaries/{gid}", body=body).get("data") or {}
+            else:
+                data = client._request("POST", "/v3/brand-glossaries",
+                                       body={"name": spec["name"], "terms": terms}).get("data") or {}
+            return {"brand_glossary_id": data.get("brand_glossary_id") or (existing or {}).get("brand_glossary_id"),
+                    "name": data.get("name"), "used": kind, "created": not existing,
+                    "terms": data.get("terms")}
+        except HeyGenError as err:
+            last = err
+            if "HTTP 400" in str(err) and kind == "terms_ipa":
+                print(f"IPA terms refused, trying respellings: {err}")
+                continue
+            raise
+    raise HeyGenError(f"Could not save glossary terms: {last}")
+
+
 def api_balance(client: HeyGenClient) -> dict:
     """The raw remaining-quota answer, for the record. Never fails the run."""
     for path in ("/v3/users/me", "/v2/user/remaining_quota"):
@@ -180,6 +219,11 @@ def main(argv=None) -> int:
     payload = {"type": "avatar", "avatar_id": look["id"], "voice_id": voice["voice_id"], "script": req["text"],
                "title": f"Sample: {req['look_name']}", "resolution": config["heygen"]["resolution"],
                "aspect_ratio": config["heygen"]["aspect_ratio"], "engine": {"type": engine}}
+    if req.get("glossary"):
+        glossary = ensure_glossary(client, req["glossary"])
+        print("Glossary: " + json.dumps(glossary))
+        payload["brand_glossary_id"] = glossary["brand_glossary_id"]
+        record["glossary"] = glossary
     if req.get("voice_settings"):  # e.g. {"engine_settings": {"engine_type": "heygen_voice", "pitch": 1}}
         payload["voice_settings"] = req["voice_settings"]
         record["voice_settings"] = req["voice_settings"]

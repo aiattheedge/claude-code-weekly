@@ -36,6 +36,11 @@ class SampleTest(unittest.TestCase):
         with self.assertRaises(HeyGenError):
             hs.find_voice(voices, "Ian Michel")
 
+    def test_merge_terms_replaces_same_term_and_keeps_others(self):
+        existing = [{"term": "ian", "pronunciation": "eye-an"}, {"term": "Claude", "pronunciation": "clawd", "ipa": None}]
+        merged = hs.merge_terms(existing, [{"term": "Ian", "ipa": "/x/"}])
+        self.assertEqual(merged, [{"term": "Claude", "pronunciation": "clawd"}, {"term": "Ian", "ipa": "/x/"}])
+
     def test_estimate_cost(self):
         self.assertEqual(hs.estimate_cost(" ".join(["w"] * 30), "avatar_iv", {"avatar_iv": 4.83}, 150), 0.97)
 
