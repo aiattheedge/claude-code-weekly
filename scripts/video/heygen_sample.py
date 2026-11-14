@@ -98,6 +98,33 @@ def list_voices(client: HeyGenClient) -> list:
     raise HeyGenError(f"Could not list voices: {errors}")
 
 
+def private_voices(client: HeyGenClient, default_id: str) -> list:
+    """Compact list of the account's own voices, from every listing that answers. Free."""
+    found = {}
+    tries = [("/v3/voices", {"type": "private", "limit": 100}), ("/v3/voices", {"ownership": "private", "limit": 100}),
+             ("/v2/voices", None)]
+    for path, query in tries:
+        try:
+            resp = client._request("GET", path, query=query)
+        except HeyGenError as err:
+            print(f"{path} {query}: {err}")
+            continue
+        data = resp.get("data")
+        voices = (data.get("voices") if isinstance(data, dict) else data) or []
+        own = [v for v in voices if v.get("type") not in ("public",) and not v.get("is_public")
+               or v.get("voice_id") == default_id]
+        print(f"{path} {query}: {len(voices)} voices, {len(own)} not public")
+        for v in own:
+            found.setdefault(v.get("voice_id"), {k: v.get(k) for k in ("name", "voice_id", "type", "available_engines",
+                                                                         "default_engine", "language")})
+    for path in (f"/v3/voices/{default_id}", f"/v2/voices/{default_id}"):
+        try:
+            print(f"{path}: {json.dumps(client._request('GET', path))[:600]}")
+        except HeyGenError as err:
+            print(f"{path}: {err}")
+    return list(found.values())
+
+
 def api_balance(client: HeyGenClient) -> dict:
     """The raw remaining-quota answer, for the record. Never fails the run."""
     for path in ("/v3/users/me", "/v2/user/remaining_quota"):
@@ -123,7 +150,12 @@ def main(argv=None) -> int:
 
     look = find_look(client.list_looks(), req["look_name"], req.get("group_id", ""))
     engine = pick_engine(look, req["engines"])
-    voice = find_voice(list_voices(client), req["voice_name"], look.get("default_voice_id", ""))
+    own = private_voices(client, look.get("default_voice_id", ""))
+    print("Own voices: " + json.dumps(own))
+    if req.get("voice_id"):
+        voice = next((v for v in own if v.get("voice_id") == req["voice_id"]), {"voice_id": req["voice_id"], "name": req["voice_name"]})
+    else:
+        voice = find_voice(own, req["voice_name"], look.get("default_voice_id", ""))
     limits = config["limits"]
     cost = estimate_cost(req["text"], engine, limits["price_per_minute_usd"], limits["words_per_minute"])
     print(f"Look: {look.get('name')} ({look.get('id')}, {look.get('avatar_type')}, engines {look.get('supported_api_engines')})")
