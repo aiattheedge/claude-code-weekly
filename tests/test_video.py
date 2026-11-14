@@ -53,6 +53,24 @@ class ScriptFileTests(unittest.TestCase):
         with self.assertRaises(script_file.ScriptError):
             script_file.check(s, max_words=50, disclosure_words=10, blocked_terms=["second"])
 
+    def test_disclosure_in_post_skips_spoken_check(self):
+        text = GOOD.replace("AI-generated", "made").replace("date:", "disclosure: post\ndate:")
+        s = script_file.parse(text)
+        self.assertEqual(s.disclosure, "post")
+        script_file.check(s, max_words=50, disclosure_words=10)
+        with self.assertRaises(script_file.ScriptError):
+            script_file.parse(GOOD.replace("date:", "disclosure: none\ndate:"))
+
+    def test_disclosure_in_post_drops_label_and_end_card_line(self):
+        cfg = make_video.load_config()
+        s = script_file.parse(GOOD.replace("date:", "disclosure: post\ndate:"))
+        label, lines = make_video.video_disclosure(cfg, s)
+        self.assertEqual(label, "")
+        self.assertFalse(any("ai-generated" in l.lower() for l in lines))
+        self.assertEqual(lines[0], cfg["end_card"]["lines"][0])
+        label, lines = make_video.video_disclosure(cfg, script_file.parse(GOOD))
+        self.assertEqual((label, lines), (cfg["disclosure"]["label_text"], cfg["end_card"]["lines"]))
+
     def test_sample_passes(self):
         with open(SAMPLE, encoding="utf-8") as f:
             s = script_file.parse(f.read())
@@ -83,6 +101,34 @@ class PayloadTests(unittest.TestCase):
         payload = make_video.build_payload(self.SCRIPT, settings, "l", "v")
         self.assertEqual(payload["engine"], {"type": "avatar_v", "more_blinking": True})
         self.assertEqual(payload["motion_prompt"], "Nods while talking")
+
+    def test_avatar_iv_with_pitch_drops_motion_fields(self):
+        settings = dict(self.BASE, engine="avatar_iv", motion_prompt="Nods", more_blinking=True, pitch="1")
+        payload = make_video.build_payload(self.SCRIPT, settings, "l", "v")
+        self.assertEqual(payload["engine"], {"type": "avatar_iv"})
+        self.assertNotIn("motion_prompt", payload)
+        self.assertEqual(payload["voice_settings"],
+                         {"engine_settings": {"engine_type": "heygen_voice", "pitch": 1.0}})
+
+    def test_cost_cap_and_price_override(self):
+        s = script_file.parse(GOOD.replace("date:", "price_per_minute_usd: 2.4\nmax_cost_usd: 11\ndate:"))
+        cfg = make_video.load_config()
+        est = make_video.estimate(s, cfg, "avatar_iv", s.overrides["price_per_minute_usd"])
+        make_video.check_cost(est, s.overrides)
+        with self.assertRaises(heygen_client.HeyGenError):
+            make_video.check_cost({"cost_usd": 11.5}, {"max_cost_usd": "11"})
+
+    def test_nov_16_script_settings(self):
+        with open(os.path.join(ROOT, "video", "script-2026-11-16.md"), encoding="utf-8") as f:
+            s = script_file.parse(f.read())
+        settings = make_video.resolve_settings(make_video.load_config(), s, env={})
+        est = make_video.estimate(s, make_video.load_config(), settings["engine"], settings["price_per_minute_usd"])
+        make_video.check_cost(est, settings)
+        payload = make_video.build_payload(s, settings, settings["avatar_id"], settings["voice_id"])
+        self.assertEqual(payload["engine"], {"type": "avatar_iv"})
+        self.assertNotIn("motion_prompt", payload)
+        self.assertNotIn("brand_glossary_id", payload)
+        self.assertNotIn("ian", s.spoken_text.lower().split())
 
 
 class LookTests(unittest.TestCase):
@@ -137,6 +183,14 @@ class SlideTests(unittest.TestCase):
         deck = [{"section": "A", "html": "a", "png": "a"}, {"section": "B", "html": "b", "png": "b"}]
         with self.assertRaises(slides.SlideError):
             slides.schedule(deck, sec, 100, "", 10.0)
+
+    def test_nov_16_slides_fit_the_nov_16_script(self):
+        with open(os.path.join(ROOT, "video", "script-2026-11-16.md"), encoding="utf-8") as f:
+            s = script_file.parse(f.read())
+        self.assertEqual(s.disclosure, "post")
+        deck = slides.load(ROOT, "2026-11-16")
+        slides.check(deck, s.sections)
+        self.assertEqual(len(deck), 7)
 
     def test_nov_2_slides_fit_the_nov_2_script(self):
         with open(SCRIPT_1102, encoding="utf-8") as f:
@@ -247,6 +301,18 @@ class EndToEndTests(unittest.TestCase):
         info = compose.probe(final)
         self.assertAlmostEqual(info["duration"], 3 + 5, delta=0.5)  # render + end card
         self.assertEqual((info["width"], info["height"]), (640, 360))
+
+    def test_render_with_disclosure_in_post(self):
+        with open(SAMPLE, encoding="utf-8") as f:
+            text = f.read().replace("\ndate:", "\ndisclosure: post\ndate:", 1)
+        path = os.path.join(self.tmp, "script-post.md")
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(text)
+        with mock.patch.object(sys.modules[__name__], "SAMPLE", path):
+            self.assertEqual(self._run(), 0)
+        final = os.path.join(self.tmp, "2026-11-02", "claude-code-latest-2026-11-02.mp4")
+        self.assertAlmostEqual(compose.probe(final)["duration"], 3 + 5, delta=0.5)
+        self.assertFalse(os.path.exists(os.path.join(self.tmp, "2026-11-02", "label.txt")))
 
     def test_render_with_slides_puts_twin_in_corner(self):
         deck = []

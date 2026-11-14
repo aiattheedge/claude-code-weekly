@@ -100,11 +100,12 @@ def finish(raw_video: str, srt: str, out_path: str, *, label: str, end_lines: li
             f.write(text)
         return path
 
-    label_file = textfile("label.txt", label)
-    main = (f"[0:v]setsar=1,subtitles=filename={srt}:force_style='{caption_style}',"
-            + _drawtext(label_file, FONT_BOLD, round(unit * 0.035), str(round(w * 0.03)),
-                        str(round(h * 0.03)), box=True, pad=round(unit * 0.012))
-            + "[main]")
+    main = f"[0:v]setsar=1,subtitles=filename={srt}:force_style='{caption_style}'"
+    if label:  # an empty label means no on-screen label
+        main += "," + _drawtext(textfile("label.txt", label), FONT_BOLD, round(unit * 0.035),
+                                str(round(w * 0.03)), str(round(h * 0.03)), box=True,
+                                pad=round(unit * 0.012))
+    main += "[main]"
 
     card_filters = []
     for i, line in enumerate(end_lines):

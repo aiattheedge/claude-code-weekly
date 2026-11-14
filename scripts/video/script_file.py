@@ -12,7 +12,9 @@ Each "# Label" line also starts a section. Slides (video/slides/<date>/slides.js
 switch at section starts, so a label names the slide that shows while it is spoken.
 
 Optional front-matter keys override video/config.json for this video:
-engine, aspect_ratio, resolution, avatar_id, voice_id, motion_prompt, more_blinking.
+engine, aspect_ratio, resolution, avatar_id, voice_id, motion_prompt, more_blinking,
+pitch (HeyGen voice pitch in semitones, -4 to 4), price_per_minute_usd (this look's rate, for the
+cost estimate) and max_cost_usd (refuse to render when the estimate is higher).
 """
 import dataclasses
 import datetime
@@ -20,7 +22,9 @@ import re
 
 REQUIRED_KEYS = ("title", "date")
 DISCLOSURE = re.compile(r"\bai-generated\b|\bai twin\b|\bdigital twin\b")
-OVERRIDE_KEYS = ("engine", "aspect_ratio", "resolution", "avatar_id", "voice_id", "motion_prompt", "more_blinking")
+DISCLOSURE_MODES = ("video", "post")  # "post": the disclosure is in the post text, not the video
+OVERRIDE_KEYS = ("engine", "aspect_ratio", "resolution", "avatar_id", "voice_id", "motion_prompt", "more_blinking",
+                 "pitch", "price_per_minute_usd", "max_cost_usd")
 
 
 class ScriptError(ValueError):
@@ -34,6 +38,7 @@ class Script:
     spoken_text: str
     overrides: dict
     sections: tuple = ()  # (label, index of the first spoken word after the label)
+    disclosure: str = "video"  # "video": spoken line, on-screen label and end-card line; "post": none in the video
 
     @property
     def word_count(self) -> int:
@@ -80,9 +85,12 @@ def parse(text: str) -> Script:
     if not spoken:
         raise ScriptError("Script has no spoken text.")
 
+    disclosure = meta.get("disclosure", "video")
+    if disclosure not in DISCLOSURE_MODES:
+        raise ScriptError(f"disclosure must be one of {DISCLOSURE_MODES}, got {disclosure!r}")
     overrides = {k: meta[k] for k in OVERRIDE_KEYS if meta.get(k)}
     return Script(title=meta["title"], date=meta["date"], spoken_text=spoken, overrides=overrides,
-                  sections=tuple(sections))
+                  sections=tuple(sections), disclosure=disclosure)
 
 
 def check(script: Script, *, max_words: int, disclosure_words: int, blocked_terms=()) -> None:
@@ -92,7 +100,7 @@ def check(script: Script, *, max_words: int, disclosure_words: int, blocked_term
     # The hook may come first, but the spoken disclosure must follow within disclosure_words.
     # A bare "AI" (as in "AI news") isn't enough: it must say "AI-generated", "AI twin" or "digital twin".
     opening = " ".join(script.spoken_text.split()[:disclosure_words]).lower()
-    if not DISCLOSURE.search(opening):
+    if script.disclosure == "video" and not DISCLOSURE.search(opening):
         raise ScriptError(f"The first {disclosure_words} spoken words must say the video is AI-generated "
                           '("AI-generated", "AI twin" or "digital twin").')
     full = f"{script.title}\n{script.spoken_text}".lower()

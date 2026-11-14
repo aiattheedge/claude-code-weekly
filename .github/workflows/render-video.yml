@@ -110,8 +110,9 @@ jobs:
           fi
 
       - name: Keep video as run artifact
-        # always(): if a later step fails, the paid HeyGen render is still kept.
-        if: always() && steps.pick.outputs.mode == 'render'
+        # Only when a step failed, so the paid HeyGen render is still kept. On success the draft
+        # release holds it: run artifacts on this public repo can be downloaded by anyone signed in.
+        if: failure() && steps.pick.outputs.mode == 'render'
         uses: actions/upload-artifact@v4
         with:
           name: video-${{ steps.pick.outputs.date }}

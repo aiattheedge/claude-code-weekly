@@ -47,6 +47,15 @@ def resolve_settings(config: dict, script: script_file.Script, env=os.environ) -
     return settings
 
 
+def video_disclosure(config: dict, script: script_file.Script):
+    """Return (on-screen label, end-card lines) for the script's disclosure mode."""
+    lines = list(config["end_card"]["lines"])
+    if script.disclosure == "post":
+        # Disclosed in the post text instead: no label, and no end-card line about AI.
+        return "", [l for l in lines if not script_file.DISCLOSURE.search(l.lower())]
+    return config["disclosure"]["label_text"], lines
+
+
 def choose_look(looks: list, *, engine: str, avatar_id: str = "", avatar_name: str = "") -> dict:
     """Pick the twin look to render with, or explain why none fits."""
     if avatar_id:
@@ -74,10 +83,12 @@ def choose_look(looks: list, *, engine: str, avatar_id: str = "", avatar_name: s
                       "Set engine to one of these in video/config.json or the script.")
 
 
-def estimate(script: script_file.Script, config: dict, engine: str) -> dict:
+def estimate(script: script_file.Script, config: dict, engine: str, price_override=None) -> dict:
+    """Words at the configured pace times the engine's price, or the script's own price_per_minute_usd
+    (photo-avatar looks bill below the digital twin rate)."""
     limits = config["limits"]
     minutes = script.word_count / limits["words_per_minute"]
-    price = limits["price_per_minute_usd"].get(engine)
+    price = float(price_override) if price_override else limits["price_per_minute_usd"].get(engine)
     return {"words": script.word_count, "minutes": round(minutes, 1),
             "cost_usd": round(minutes * price, 2) if price is not None else None}
 
@@ -88,7 +99,8 @@ def _is_true(value) -> bool:
 
 def build_payload(script: script_file.Script, settings: dict, look_id: str, voice_id: str) -> dict:
     engine = {"type": settings["engine"]}
-    if _is_true(settings.get("more_blinking")):
+    avatar_v = settings["engine"] == "avatar_v"
+    if avatar_v and _is_true(settings.get("more_blinking")):
         engine["more_blinking"] = True
     payload = {
         "type": "avatar",
@@ -102,9 +114,28 @@ def build_payload(script: script_file.Script, settings: dict, look_id: str, voic
         "caption": {"file_format": "srt"},
     }
     # Avatar V only: natural-language direction for body motion and hand gestures.
-    if settings.get("motion_prompt"):
+    if avatar_v and settings.get("motion_prompt"):
         payload["motion_prompt"] = settings["motion_prompt"]
+    if settings.get("pitch") not in (None, ""):
+        payload["voice_settings"] = {"engine_settings": {"engine_type": "heygen_voice",
+                                                         "pitch": float(settings["pitch"])}}
     return payload
+
+
+def check_cost(est: dict, settings: dict) -> None:
+    """Refuse a render whose estimate is over the script's max_cost_usd."""
+    cap = settings.get("max_cost_usd")
+    if cap and (est["cost_usd"] is None or est["cost_usd"] > float(cap)):
+        raise HeyGenError(f"Estimated ${est['cost_usd']} is over the ${cap} cap in the script.")
+
+
+def api_balance(client: HeyGenClient):
+    """The API wallet balance in USD, for the record. Never fails the run."""
+    try:
+        data = client._request("GET", "/v3/users/me").get("data") or {}
+        return (data.get("wallet") or {}).get("remaining_balance")
+    except HeyGenError:
+        return None
 
 
 def idempotency_key(payload: dict) -> str:
@@ -135,7 +166,8 @@ def main(argv=None) -> int:
                       disclosure_words=config["disclosure"]["require_ai_in_first_words"],
                       blocked_terms=blocked)
     settings = resolve_settings(config, script)
-    est = estimate(script, config, settings["engine"])
+    est = estimate(script, config, settings["engine"], settings.get("price_per_minute_usd"))
+    check_cost(est, settings)
     deck = slide_deck.load(REPO_ROOT, script.date)
     if deck:
         slide_deck.check(deck, script.sections)
@@ -172,6 +204,7 @@ def main(argv=None) -> int:
     out_dir = os.path.join(os.environ.get("VIDEO_OUT_DIR", os.path.join(REPO_ROOT, "out", "video")), script.date)
     os.makedirs(out_dir, exist_ok=True)
     payload = build_payload(script, settings, look["id"], voice_id)
+    balance_before = api_balance(client)
     video_id = client.create_video(payload, idempotency_key(payload))
     print(f"HeyGen video id: {video_id}")
     limits = config["limits"]
@@ -203,14 +236,17 @@ def main(argv=None) -> int:
                             margin=layout.get("margin_px", 40))
         caption_style = compose.SLIDES_CAPTION_STYLE
         summary.append("- Slides: " + ", ".join(f"{os.path.basename(p)} at {round(t0)}s" for p, t0, _ in timing))
-    compose.finish(base, srt, final, label=config["disclosure"]["label_text"],
-                   end_lines=config["end_card"]["lines"], end_seconds=config["end_card"]["seconds"],
+    label, end_lines = video_disclosure(config, script)
+    compose.finish(base, srt, final, label=label,
+                   end_lines=end_lines, end_seconds=config["end_card"]["seconds"],
                    workdir=out_dir, caption_style=caption_style)
     seconds = data.get("duration") or compose.probe(raw)["duration"]
     with open(os.path.join(out_dir, "render.json"), "w", encoding="utf-8") as f:
         json.dump({"video_id": video_id, "look_id": look["id"], "voice_id": voice_id,
-                   "engine": settings["engine"], "duration_seconds": seconds,
-                   "captions": caption_source}, f, indent=2)
+                   "engine": settings["engine"], "voice_settings": payload.get("voice_settings"),
+                   "duration_seconds": seconds, "captions": caption_source,
+                   "balance_before_usd": balance_before, "balance_after_usd": api_balance(client)},
+                  f, indent=2)
     write_summary(summary + [f"- Rendered {round(float(seconds) / 60, 1)} min, HeyGen id `{video_id}`",
                              f"- Captions: {caption_source}", f"- Output: `{final}`"])
     return 0

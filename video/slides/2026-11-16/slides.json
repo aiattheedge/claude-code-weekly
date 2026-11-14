@@ -1,0 +1,37 @@
+[
+  {
+    "section": "Intro: the minutes problem",
+    "html": "slide-01.html",
+    "png": "out/slides/2026-11-16/slide-01.png"
+  },
+  {
+    "section": "From note taker to member",
+    "html": "slide-02.html",
+    "png": "out/slides/2026-11-16/slide-02.png"
+  },
+  {
+    "section": "Why big companies say no",
+    "html": "slide-03.html",
+    "png": "out/slides/2026-11-16/slide-03.png"
+  },
+  {
+    "section": "What Anthropic built in",
+    "html": "slide-04.html",
+    "png": "out/slides/2026-11-16/slide-04.png"
+  },
+  {
+    "section": "Agents inside your walls",
+    "html": "slide-05.html",
+    "png": "out/slides/2026-11-16/slide-05.png"
+  },
+  {
+    "section": "How to start",
+    "html": "slide-06.html",
+    "png": "out/slides/2026-11-16/slide-06.png"
+  },
+  {
+    "section": "Close",
+    "html": "slide-07.html",
+    "png": "out/slides/2026-11-16/slide-07.png"
+  }
+]
