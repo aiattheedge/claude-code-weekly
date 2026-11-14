@@ -180,6 +180,9 @@ def main(argv=None) -> int:
     payload = {"type": "avatar", "avatar_id": look["id"], "voice_id": voice["voice_id"], "script": req["text"],
                "title": f"Sample: {req['look_name']}", "resolution": config["heygen"]["resolution"],
                "aspect_ratio": config["heygen"]["aspect_ratio"], "engine": {"type": engine}}
+    if req.get("voice_settings"):  # e.g. {"engine_settings": {"engine_type": "heygen_voice", "pitch": 1}}
+        payload["voice_settings"] = req["voice_settings"]
+        record["voice_settings"] = req["voice_settings"]
     key = "ccw-sample-" + hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()[:40]
     video_id = client.create_video(payload, key)
     print(f"HeyGen video id: {video_id}")

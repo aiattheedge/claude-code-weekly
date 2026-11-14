@@ -1,0 +1,19 @@
+{
+  "note": "Third API test: sweater look, HeyGen voice pitch up 1 semitone (Ian said the voice is too deep, Nov 14).",
+  "mode": "render",
+  "look_name": "Glasses-wearing professional in sweater",
+  "group_id": "3b139202312a472babc5d62550507c96",
+  "voice_name": "Ian Michel",
+  "voice_id": "e6e3598e30584c289fa8ac457ce5db5d",
+  "voice_settings": {
+    "engine_settings": {
+      "engine_type": "heygen_voice",
+      "pitch": 1.0
+    }
+  },
+  "engines": [
+    "avatar_iv"
+  ],
+  "max_cost_usd": 1.0,
+  "text": "Hi, I'm Ian. Think about your last big meeting. Three decisions, five action items, and a week later nobody agrees on what was said. That's why transcription is so valuable."
+}
