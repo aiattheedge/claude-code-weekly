@@ -1,0 +1,19 @@
+{
+  "note": "Opening swap for the Nov 16 video: Ian's new line (Nov 14). Sweater look, pitch +1, no glossary.",
+  "mode": "render",
+  "look_name": "Glasses-wearing professional in sweater",
+  "group_id": "3b139202312a472babc5d62550507c96",
+  "voice_name": "Ian Michel",
+  "voice_id": "e6e3598e30584c289fa8ac457ce5db5d",
+  "voice_settings": {
+    "engine_settings": {
+      "engine_type": "heygen_voice",
+      "pitch": 1.0
+    }
+  },
+  "engines": [
+    "avatar_iv"
+  ],
+  "max_cost_usd": 1.0,
+  "text": "Welcome to Claude Code Weekly: Special Edition."
+}
