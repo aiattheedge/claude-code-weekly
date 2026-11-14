@@ -17,6 +17,14 @@ class SampleTest(unittest.TestCase):
         with self.assertRaises(HeyGenError):
             hs.find_look(LOOKS, "blazer")
 
+    def test_find_look_by_group_when_names_repeat(self):
+        looks = [{"name": "Blazer", "id": "x", "group_id": "g1"}, {"name": "Blazer", "id": "y", "group_id": "g2"}]
+        self.assertEqual(hs.find_look(looks, "Blazer", "g2")["id"], "y")
+        with self.assertRaises(HeyGenError):
+            hs.find_look(looks, "Blazer")
+        with self.assertRaises(HeyGenError):
+            hs.find_look(looks, "Blazer", "g3")
+
     def test_pick_engine_in_request_order(self):
         self.assertEqual(hs.pick_engine(LOOKS[1], ["avatar_iv", "avatar_v"]), "avatar_iv")
         with self.assertRaises(HeyGenError):

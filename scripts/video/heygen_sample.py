@@ -27,10 +27,20 @@ def load_request(path: str) -> dict:
     return req
 
 
-def find_look(looks: list, name: str) -> dict:
-    """The one finished private look whose name matches exactly (ignoring case)."""
+def look_group(look: dict) -> str:
+    return look.get("group_id") or look.get("avatar_group_id") or (look.get("group") or {}).get("id") or ""
+
+
+def find_look(looks: list, name: str, group_id: str = "") -> dict:
+    """The one finished private look whose name matches exactly (ignoring case), in the avatar
+    group_id when given (two avatars can each have a look with the same name)."""
     matches = [l for l in looks if (l.get("name") or "").strip().lower() == name.strip().lower()
                and l.get("status") not in ("processing", "failed")]
+    if group_id and len(matches) > 1:
+        in_group = [l for l in matches if look_group(l) == group_id]
+        if not in_group:
+            raise HeyGenError(f"No look named {name!r} is in group {group_id}. Matches: {matches}")
+        matches = in_group
     if len(matches) != 1:
         raise HeyGenError(f"Expected one look named {name!r}, found {len(matches)}. Looks: "
                           f"{[(l.get('name'), l.get('id'), l.get('avatar_type'), l.get('supported_api_engines')) for l in looks]}")
@@ -102,7 +112,7 @@ def main(argv=None) -> int:
     req = load_request(args.request)
     client = HeyGenClient(os.environ.get("HEYGEN_API_KEY", ""))
 
-    look = find_look(client.list_looks(), req["look_name"])
+    look = find_look(client.list_looks(), req["look_name"], req.get("group_id", ""))
     engine = pick_engine(look, req["engines"])
     voice = find_voice(list_voices(client), req["voice_name"], look.get("default_voice_id", ""))
     limits = config["limits"]
@@ -114,7 +124,7 @@ def main(argv=None) -> int:
         raise HeyGenError(f"Estimated ${cost:.2f} is over the ${req['max_cost_usd']} cap.")
 
     os.makedirs(args.out_dir, exist_ok=True)
-    record = {"look_name": look.get("name"), "look_id": look.get("id"), "avatar_type": look.get("avatar_type"),
+    record = {"look_name": look.get("name"), "look_id": look.get("id"), "group_id": look_group(look), "avatar_type": look.get("avatar_type"),
               "supported_api_engines": look.get("supported_api_engines"), "engine": engine,
               "voice_name": voice.get("name"), "voice_id": voice.get("voice_id"),
               "words": len(req["text"].split()), "estimated_cost_usd": cost,
