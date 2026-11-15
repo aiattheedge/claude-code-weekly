@@ -40,5 +40,11 @@
     "out": "out/slides/2026-11-16/slide-07.png",
     "width": 1920,
     "height": 1080
+  },
+  {
+    "html": "slide-08.html",
+    "out": "out/slides/2026-11-16/slide-08.png",
+    "width": 1920,
+    "height": 1080
   }
 ]

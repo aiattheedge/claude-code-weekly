@@ -190,7 +190,7 @@ class SlideTests(unittest.TestCase):
         self.assertEqual(s.disclosure, "post")
         deck = slides.load(ROOT, "2026-11-16")
         slides.check(deck, s.sections)
-        self.assertEqual(len(deck), 7)
+        self.assertEqual(len(deck), 8)
 
     def test_nov_2_slides_fit_the_nov_2_script(self):
         with open(SCRIPT_1102, encoding="utf-8") as f:
