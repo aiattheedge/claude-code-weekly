@@ -71,6 +71,13 @@ class ScriptFileTests(unittest.TestCase):
         label, lines = make_video.video_disclosure(cfg, script_file.parse(GOOD))
         self.assertEqual((label, lines), (cfg["disclosure"]["label_text"], cfg["end_card"]["lines"]))
 
+    def test_end_card_from_front_matter(self):
+        cfg = make_video.load_config()
+        s = script_file.parse(GOOD.replace("date:", "end_card: Special Edition | Link in the post\ndate:"))
+        self.assertEqual(s.end_card, ("Special Edition", "Link in the post"))
+        _, lines = make_video.video_disclosure(cfg, s)
+        self.assertEqual(lines, ["Special Edition", "Link in the post"])
+
     def test_sample_passes(self):
         with open(SAMPLE, encoding="utf-8") as f:
             s = script_file.parse(f.read())

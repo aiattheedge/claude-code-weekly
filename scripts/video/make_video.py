@@ -49,7 +49,7 @@ def resolve_settings(config: dict, script: script_file.Script, env=os.environ) -
 
 def video_disclosure(config: dict, script: script_file.Script):
     """Return (on-screen label, end-card lines) for the script's disclosure mode."""
-    lines = list(config["end_card"]["lines"])
+    lines = list(script.end_card or config["end_card"]["lines"])
     if script.disclosure == "post":
         # Disclosed in the post text instead: no label, and no end-card line about AI.
         return "", [l for l in lines if not script_file.DISCLOSURE.search(l.lower())]

@@ -39,6 +39,7 @@ class Script:
     overrides: dict
     sections: tuple = ()  # (label, index of the first spoken word after the label)
     disclosure: str = "video"  # "video": spoken line, on-screen label and end-card line; "post": none in the video
+    end_card: tuple = ()  # lines for this video's end card, from front matter "end_card: line one | line two"
 
     @property
     def word_count(self) -> int:
@@ -89,8 +90,9 @@ def parse(text: str) -> Script:
     if disclosure not in DISCLOSURE_MODES:
         raise ScriptError(f"disclosure must be one of {DISCLOSURE_MODES}, got {disclosure!r}")
     overrides = {k: meta[k] for k in OVERRIDE_KEYS if meta.get(k)}
+    end_card = tuple(l.strip() for l in meta.get("end_card", "").split("|") if l.strip())
     return Script(title=meta["title"], date=meta["date"], spoken_text=spoken, overrides=overrides,
-                  sections=tuple(sections), disclosure=disclosure)
+                  sections=tuple(sections), disclosure=disclosure, end_card=end_card)
 
 
 def check(script: Script, *, max_words: int, disclosure_words: int, blocked_terms=()) -> None:
