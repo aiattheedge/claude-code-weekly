@@ -3,20 +3,20 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Claude Code Latest Nov 2-9: plugin updates of the week</title>
-<meta name="description" content="Plugin changes in Claude Code 2.1.317 to 2.1.319: fail-closed SDK hooks, plugin status lines, hooks after interrupts, dependency updates, eval tests.">
+<title>Claude Code Latest Nov 9-15: plugin updates of the week</title>
+<meta name="description" content="Plugin changes in Claude Code 2.1.321 to 2.1.325: scheduled skills, mod reloads, hook approvals, marketplace pins and stricter plugin checks.">
 <link rel="canonical" href="https://aiattheedge.github.io/claude-code-weekly/">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://aiattheedge.github.io/claude-code-weekly/">
-<meta property="og:title" content="Claude Code Latest Nov 2-9: plugin updates of the week">
-<meta property="og:description" content="Plugin changes in Claude Code 2.1.317 to 2.1.319: fail-closed SDK hooks, plugin status lines, hooks after interrupts, dependency updates, eval tests.">
-<meta property="og:image" content="https://aiattheedge.github.io/claude-code-weekly/og-cover-v7.png">
+<meta property="og:title" content="Claude Code Latest Nov 9-15: plugin updates of the week">
+<meta property="og:description" content="Plugin changes in Claude Code 2.1.321 to 2.1.325: scheduled skills, mod reloads, hook approvals, marketplace pins and stricter plugin checks.">
+<meta property="og:image" content="https://aiattheedge.github.io/claude-code-weekly/og-cover-v8.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Claude Code Latest Nov 2-9: plugin updates of the week">
-<meta name="twitter:description" content="Plugin changes in Claude Code 2.1.317 to 2.1.319: fail-closed SDK hooks, plugin status lines, hooks after interrupts, dependency updates, eval tests.">
-<meta name="twitter:image" content="https://aiattheedge.github.io/claude-code-weekly/og-cover-v7.png">
+<meta name="twitter:title" content="Claude Code Latest Nov 9-15: plugin updates of the week">
+<meta name="twitter:description" content="Plugin changes in Claude Code 2.1.321 to 2.1.325: scheduled skills, mod reloads, hook approvals, marketplace pins and stricter plugin checks.">
+<meta name="twitter:image" content="https://aiattheedge.github.io/claude-code-weekly/og-cover-v8.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,700;1,6..72,500&family=DM+Sans:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
 /* Layout: black editorial page, orange accent, 10-second quick-run list up top, one icon tile per feature. Deliberately single-theme (Claude Code dark). */
@@ -72,7 +72,7 @@ code{font-family:var(--mono);font-size:.88em;background:var(--panel2);padding:1p
 .badges{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 6px;position:relative;z-index:1}
 .badge{font-family:var(--mono);font-size:11px;border:1px solid var(--line);border-radius:8px;padding:3px 9px;color:var(--muted)}
 .badge b{color:var(--orange);font-weight:500}
-.band{border:1px solid var(--line);border-radius:18px;padding:24px;margin-bottom:22px;background:var(--panel)}
+.band{scroll-margin-top:16px;border:1px solid var(--line);border-radius:18px;padding:24px;margin-bottom:22px;background:var(--panel)}
 .band h2{font-family:var(--serif);font-size:28px;margin:0 0 10px}
 .safe{border-color:var(--orange);background:linear-gradient(135deg,rgba(255,122,26,.12),transparent)}
 .ask{text-align:center;padding:38px 16px;border-top:1px solid var(--line);margin-top:32px}
@@ -98,6 +98,9 @@ ul.src{padding-left:20px;margin:8px 0}
     <symbol id="i-hook" viewBox="0 0 48 48"><path d="M24 4v22a8 8 0 1 1-8-8" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/><circle cx="24" cy="8" r="4" fill="currentColor"/><path d="M12 14h8" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/></symbol>
     <symbol id="i-box" viewBox="0 0 48 48"><path d="M24 5 6 14v20l18 9 18-9V14L24 5Z" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linejoin="round"/><path d="M6 14l18 9 18-9M24 23v20" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linejoin="round"/></symbol>
     <symbol id="i-flask" viewBox="0 0 48 48"><path d="M18 5h12M20 5v13L9 38a4 4 0 0 0 3.6 6h22.8A4 4 0 0 0 39 38L28 18V5" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 32h20" stroke="currentColor" stroke-width="3.2"/></symbol>
+    <symbol id="i-play" viewBox="0 0 48 48"><rect x="5" y="9" width="38" height="30" rx="7" fill="none" stroke="currentColor" stroke-width="3.2"/><path d="M20 17v14l12-7-12-7Z" fill="currentColor"/></symbol>
+    <symbol id="i-list" viewBox="0 0 48 48"><path d="M17 12h24M17 24h24M17 36h24" stroke="currentColor" stroke-width="3.6" stroke-linecap="round"/><circle cx="8" cy="12" r="3" fill="currentColor"/><circle cx="8" cy="24" r="3" fill="currentColor"/><circle cx="8" cy="36" r="3" fill="currentColor"/></symbol>
+    <symbol id="i-plug" viewBox="0 0 48 48"><path d="M17 5v10M31 5v10M11 15h26v8a13 13 0 0 1-26 0v-8ZM24 36v8" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   </defs>
 </svg>
 
@@ -105,176 +108,165 @@ ul.src{padding-left:20px;margin:8px 0}
 <body>
 <div class="wrap">
   <header class="hero">
-    <div class="kicker"><i></i> Claude Code · Latest · Nov 2 to Nov 9, 2026</div>
-    <h1>Claude Code <em>plugin</em> updates: <span style="color:var(--orange)">Nov 2 to 9</span></h1>
-    <p class="lede">Three Claude Code releases shipped between Monday Nov 2 and Monday Nov 9 (2.1.317, 2.1.318 and 2.1.319). I read every changelog entry and kept the ones that touch plugins. Five have a snippet you can copy. The rest are quick notes below.</p>
-    <div class="stats"><span class="chip"><b>3</b> releases read</span><span class="chip"><b>5</b> features</span><span class="chip"><b>7</b> copy-paste snippets</span></div>
+    <div class="kicker"><i></i> Claude Code · Latest · Nov 9 to Nov 15, 2026</div>
+    <h1>Claude Code <em>plugin</em> updates: <span style="color:var(--orange)">Nov 9 to 15</span></h1>
+    <p class="lede">Four Claude Code releases shipped between Monday Nov 9 and Sunday Nov 15 (2.1.321, 2.1.322, 2.1.323 and 2.1.325). I read every changelog entry and kept the ones that touch plugins. Five have a snippet you can copy. The rest are quick notes below. This week also has a Special Edition section about Claude in meetings.</p>
+    <div class="stats"><span class="chip"><b>4</b> releases read</span><span class="chip"><b>5</b> features</span><span class="chip"><b>5</b> copy-paste snippets</span><span class="chip"><b>+1</b> special edition</span></div>
   </header>
   <section class="tldr" aria-label="Ten second version">
     <h2>The 10-second version</h2>
-    <div class="tl"><span class="n">01</span><code>onFailure: &quot;block&quot;</code><button class="copy" type="button" data-t="onFailure: &quot;block&quot;">Copy</button></div>
-    <div class="tl"><span class="n">02</span><code>&quot;subagentStatusLine&quot;: { ... }</code><button class="copy" type="button" data-t="&quot;subagentStatusLine&quot;: { ... }">Copy</button></div>
-    <div class="tl"><span class="n">03</span><code>&quot;PostToolUse&quot;: [ ... ]</code><button class="copy" type="button" data-t="&quot;PostToolUse&quot;: [ ... ]">Copy</button></div>
-    <div class="tl"><span class="n">04</span><code>claude plugin update backend-standard</code><button class="copy" type="button" data-t="claude plugin update backend-standard">Copy</button></div>
-    <div class="tl"><span class="n">05</span><code>min: 0 and max: 0</code><button class="copy" type="button" data-t="min: 0
-max: 0">Copy</button></div>
+    <div class="tl"><span class="n">01</span><code>Skill(commit)</code><button class="copy" type="button" data-t="Skill(commit)">Copy</button></div>
+    <div class="tl"><span class="n">02</span><code>CLAUDE_CODE_PLUGIN_DIR_WATCH=0 claude -p &quot;summarize this repo&quot;</code><button class="copy" type="button" data-t="CLAUDE_CODE_PLUGIN_DIR_WATCH=0 claude -p &quot;summarize this repo&quot;">Copy</button></div>
+    <div class="tl"><span class="n">03</span><code>&quot;permissionDecision&quot;: &quot;allow&quot;</code><button class="copy" type="button" data-t="&quot;permissionDecision&quot;: &quot;allow&quot;">Copy</button></div>
+    <div class="tl"><span class="n">04</span><code>&quot;ref&quot;: &quot;a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0&quot;</code><button class="copy" type="button" data-t="&quot;ref&quot;: &quot;a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0&quot;">Copy</button></div>
+    <div class="tl"><span class="n">05</span><code>claude plugin validate ./my-plugin --strict</code><button class="copy" type="button" data-t="claude plugin validate ./my-plugin --strict">Copy</button></div>
   </section>
   <h2 class="toc-h">In this issue</h2>
   <nav class="toc" aria-label="Table of contents">
-    <a href="#f1"><svg><use href="#i-shield"/></svg><div><small>Agent SDK · Added</small><span>Make a broken safety check fail closed</span></div></a>
-    <a href="#f2"><svg><use href="#i-bolt"/></svg><div><small>Plugins · Fixed</small><span>Plugin status lines can find their own scripts</span></div></a>
-    <a href="#f3"><svg><use href="#i-hook"/></svg><div><small>Hooks · Changed</small><span>After-tool hooks still run when you jump in</span></div></a>
-    <a href="#f4"><svg><use href="#i-box"/></svg><div><small>Plugins · Fixed</small><span>Plugin updates now bring new dependencies</span></div></a>
-    <a href="#f5"><svg><use href="#i-flask"/></svg><div><small>Evals · Fixed</small><span>Test that a tool is never called</span></div></a>
+    <a href="#f1"><svg><use href="#i-shield"/></svg><div><small>Skills · Changed</small><span>Let a scheduled task run your skill</span></div></a>
+    <a href="#f2"><svg><use href="#i-bolt"/></svg><div><small>Mods · Changed</small><span>Mods now reload in headless runs</span></div></a>
+    <a href="#f3"><svg><use href="#i-hook"/></svg><div><small>Hooks · Changed</small><span>A hook&#x27;s yes no longer covers a broken check</span></div></a>
+    <a href="#f4"><svg><use href="#i-box"/></svg><div><small>Marketplaces · Changed</small><span>Pin a plugin store to one commit</span></div></a>
+    <a href="#f5"><svg><use href="#i-flask"/></svg><div><small>Validate · Added</small><span>Catch mod type errors before you ship</span></div></a>
+    <a href="#special"><svg><use href="#i-play"/></svg><div><small>Special Edition</small><span>Claude joined the meeting</span></div></a>
+    <a href="#also"><svg><use href="#i-list"/></svg><div><small>Quick notes</small><span>Also this week</span></div></a>
+    <a href="#install"><svg><use href="#i-plug"/></svg><div><small>Start here</small><span>How to install a plugin</span></div></a>
+    <a href="#safe"><svg><use href="#i-shield"/></svg><div><small>Read first</small><span>Stay safe</span></div></a>
   </nav>
   <article class="feature" id="f1">
     <div class="fhead"><div class="icon"><svg><use href="#i-shield"/></svg></div>
-    <div><div class="cat">Agent SDK <span class="tag new">ADDED · v2.1.317 · NOV 3</span></div><h3>Make a broken safety check fail closed</h3></div></div>
-    <p class="hook">What if your safety check crashes? Does the risky action still run?</p>
-    <div class="badges"><span class="badge"><b>Time</b> 15 min</span><span class="badge"><b>Level</b> intermediate</span><span class="badge"><b>For</b> SDK builders</span></div>
-    <div class="row"><b>What</b><div>A hook is a small check that runs at a set moment, like before Claude runs a command. If an Agent SDK hook callback crashed, the action used to go ahead. Since 2.1.317, you can set onFailure to &quot;block&quot; on the matcher. Then a crash stops the action instead.</div></div>
-    <div class="row"><b>Why</b><div>A broken guard should fail closed, not open. This matters most for jobs that run with no one watching. Let the error reach the SDK: a callback that catches its own error and returns {} does not count as failing.</div></div>
-    <div class="row"><b>Needs</b><div>Version 2.1.317. The docs say TypeScript Agent SDK v0.3.317 or later, or Python Agent SDK v0.2.177 or later. Hooks in settings files have had onFailure since v2.1.295 (docs).</div></div>
-    <div class="path">In your TypeScript Agent SDK app (the docs&#x27; example; checkPolicy is your own check):</div>
-    <div class="codebox"><pre>import type { Options } from &quot;@anthropic-ai/claude-agent-sdk&quot;;
-
-const options: Options = {
-  hooks: {
-    PreToolUse: [{ matcher: &quot;Bash&quot;, hooks: [checkPolicy], onFailure: &quot;block&quot; }]
-  }
-};</pre></div>
-    <div class="check"><b>Did it work?</b> Make checkPolicy throw an error, then ask Claude to run a Bash command. The tool result should include: failed; blocking because onFailure is &quot;block&quot;.</div>
-  </article>
-  <article class="feature" id="f2">
-    <div class="fhead"><div class="icon"><svg><use href="#i-bolt"/></svg></div>
-    <div><div class="cat">Plugins <span class="tag new">FIXED · v2.1.319 · NOV 6</span></div><h3>Plugin status lines can find their own scripts</h3></div></div>
-    <p class="hook">Want your plugin to draw its own row for each helper agent?</p>
-    <div class="badges"><span class="badge"><b>Time</b> 15 min</span><span class="badge"><b>Level</b> intermediate</span><span class="badge"><b>For</b> plugin authors</span></div>
-    <div class="row"><b>What</b><div>A subagent is a helper Claude starts for a side job. The agent panel shows one row for each. A plugin can set subagentStatusLine in its settings.json to draw those rows with its own script. ${CLAUDE_PLUGIN_ROOT} stands for the folder where the plugin lives. Before 2.1.319, it was not filled in for this command. Now it is.</div></div>
-    <div class="row"><b>Why</b><div>You can ship the script inside the plugin, so users do not copy it anywhere. The script reads the rows as JSON and prints one JSON line per row it wants to change (see the docs).</div></div>
-    <div class="row"><b>Needs</b><div>Version 2.1.319 or later. Only two settings keys work from a plugin: agent and subagentStatusLine (docs).</div></div>
-    <div class="path">Save as settings.json at your plugin&#x27;s root (my example; the shape is from the docs):</div>
+    <div><div class="cat">Skills <span class="tag new">CHANGED · v2.1.325 · NOV 13</span></div><h3>Let a scheduled task run your skill</h3></div></div>
+    <p class="hook">Did your /loop job stop and wait for you at 2 AM?</p>
+    <div class="badges"><span class="badge"><b>Time</b> 10 min</span><span class="badge"><b>Level</b> beginner</span><span class="badge"><b>For</b> anyone who schedules work</span></div>
+    <div class="row"><b>What</b><div>A skill is a saved set of instructions Claude follows. Some skills list allowed-tools, which are tools they may use without asking. Some carry hooks, which are small checks. Since 2.1.325, scheduled tasks and /loop ask you first before they run a skill like that. To let one run on its own, add Skill(name) to permissions.allow.</div></div>
+    <div class="row"><b>Why</b><div>A skill with its own tool grants is strong. Now it can&#x27;t run with no one watching unless you named it. One rule per skill keeps that choice clear.</div></div>
+    <div class="row"><b>Needs</b><div>Version 2.1.325 or later. Skill(name) matches one skill. Skill(name *) matches it with any arguments (docs).</div></div>
+    <div class="path">Save in .claude/settings.json (my example; the rule form is from the docs; commit stands for your skill&#x27;s name):</div>
     <div class="codebox"><pre>{
-  &quot;subagentStatusLine&quot;: {
-    &quot;type&quot;: &quot;command&quot;,
-    &quot;command&quot;: &quot;\&quot;${CLAUDE_PLUGIN_ROOT}/scripts/subagent-row.sh\&quot;&quot;
-  }
-}</pre></div>
-    <div class="check"><b>Did it work?</b> Ask Claude to use a subagent. Its row in the agent panel should show what your script prints.</div>
-  </article>
-  <article class="feature" id="f3">
-    <div class="fhead"><div class="icon"><svg><use href="#i-hook"/></svg></div>
-    <div><div class="cat">Hooks <span class="tag new">CHANGED · v2.1.319 · NOV 6</span></div><h3>After-tool hooks still run when you jump in</h3></div></div>
-    <p class="hook">Does your formatter skip a file when you type mid-task?</p>
-    <div class="badges"><span class="badge"><b>Time</b> 5 min</span><span class="badge"><b>Level</b> beginner</span><span class="badge"><b>For</b> plugin authors</span></div>
-    <div class="row"><b>What</b><div>A PostToolUse hook runs after a tool, like after Claude edits a file. Before 2.1.319, these hooks did not start if you broke into the turn with a new message, and a running hook was stopped. Now, if you send with Ctrl+Enter and the tool finishes, the hooks run on its result. They get up to 10 seconds.</div></div>
-    <div class="row"><b>Why</b><div>Format and lint hooks no longer miss edits just because you spoke up. Esc still cancels them at once.</div></div>
-    <div class="row"><b>Needs</b><div>Version 2.1.319 or later. A hook that needs more than 10 seconds can use async: true, but then it cannot block or change the result (docs).</div></div>
-    <div class="path">Save as hooks/hooks.json in your plugin (the docs&#x27; example):</div>
-    <div class="codebox"><pre>{
-  &quot;hooks&quot;: {
-    &quot;PostToolUse&quot;: [
-      {
-        &quot;matcher&quot;: &quot;Write|Edit&quot;,
-        &quot;hooks&quot;: [
-          {
-            &quot;type&quot;: &quot;command&quot;,
-            &quot;command&quot;: &quot;\&quot;${CLAUDE_PLUGIN_ROOT}/scripts/format.sh\&quot;&quot;
-          }
-        ]
-      }
+  &quot;permissions&quot;: {
+    &quot;allow&quot;: [
+      &quot;Skill(commit)&quot;
     ]
   }
 }</pre></div>
-    <div class="check"><b>Did it work?</b> Ask Claude to edit a file. While it works, type a message and press Ctrl+Enter. The format script should still run on that file.</div>
+    <div class="check"><b>Did it work?</b> Start a loop that runs the skill, such as /loop 20m /commit. The next run should start the skill without a question.</div>
+  </article>
+  <article class="feature" id="f2">
+    <div class="fhead"><div class="icon"><svg><use href="#i-bolt"/></svg></div>
+    <div><div class="cat">Mods <span class="tag new">CHANGED · v2.1.321 · NOV 9</span></div><h3>Mods now reload in headless runs</h3></div></div>
+    <p class="hook">Fixed your mod mid-run, but the script kept the old one?</p>
+    <div class="badges"><span class="badge"><b>Time</b> 5 min</span><span class="badge"><b>Level</b> intermediate</span><span class="badge"><b>For</b> plugin authors</span></div>
+    <div class="row"><b>What</b><div>A mod is a plugin part that changes Claude Code itself, like a pane or a rule for tool calls. A headless run has no chat window, like claude -p. Since 2.1.321, headless sessions reload mods in .claude/skills when their files change. Set CLAUDE_CODE_PLUGIN_DIR_WATCH to 0 to turn reloading off everywhere.</div></div>
+    <div class="row"><b>Why</b><div>Long scripted runs pick up your fixes right away. If a run must stay the same from start to end, turn reloading off for that run.</div></div>
+    <div class="row"><b>Needs</b><div>Version 2.1.321 for the headless change. The variable itself needs v2.1.287 or later. By the docs, mods in --plugin-dir folders reload only in interactive terminal sessions unless you set it to 1.</div></div>
+    <div class="path">In your shell (my example):</div>
+    <div class="codebox"><pre>CLAUDE_CODE_PLUGIN_DIR_WATCH=0 claude -p &quot;summarize this repo&quot;</pre></div>
+    <div class="check"><b>Did it work?</b> Change a mod&#x27;s file while the run is going. With 0 set, the run keeps the version it started with.</div>
+  </article>
+  <article class="feature" id="f3">
+    <div class="fhead"><div class="icon"><svg><use href="#i-hook"/></svg></div>
+    <div><div class="cat">Hooks <span class="tag new">CHANGED · v2.1.323 · NOV 12</span></div><h3>A hook&#x27;s yes no longer covers a broken check</h3></div></div>
+    <p class="hook">What happens when your hook says yes, but the safety check breaks?</p>
+    <div class="badges"><span class="badge"><b>Time</b> 10 min</span><span class="badge"><b>Level</b> intermediate</span><span class="badge"><b>For</b> hook authors</span></div>
+    <div class="row"><b>What</b><div>A PreToolUse hook runs before a tool. It can answer &quot;allow&quot; to skip the prompt. Claude Code then still runs its own permission check on the call. Since 2.1.323, if that check fails with an error, Claude Code decides the call as if no hook had answered. If a PermissionRequest hook rewrote the input and the check fails, it asks again, or refuses where nobody can answer.</div></div>
+    <div class="row"><b>Why</b><div>A hook&#x27;s yes only counts when the check behind it works. A crash now falls back to the normal rules, not a free pass.</div></div>
+    <div class="row"><b>Needs</b><div>Version 2.1.323 or later. Deny and ask rules still apply, whatever a hook returns (docs).</div></div>
+    <div class="path">What your hook prints (my example, using fields from the docs):</div>
+    <div class="codebox"><pre>{
+  &quot;hookSpecificOutput&quot;: {
+    &quot;hookEventName&quot;: &quot;PreToolUse&quot;,
+    &quot;permissionDecision&quot;: &quot;allow&quot;,
+    &quot;permissionDecisionReason&quot;: &quot;My reason here&quot;
+  }
+}</pre></div>
+    <div class="check"><b>Did it work?</b> Normal calls skip the prompt. If the permission check errors, you get the usual prompt or rule result instead.</div>
   </article>
   <article class="feature" id="f4">
     <div class="fhead"><div class="icon"><svg><use href="#i-box"/></svg></div>
-    <div><div class="cat">Plugins <span class="tag new">FIXED · v2.1.319 · NOV 6</span></div><h3>Plugin updates now bring new dependencies</h3></div></div>
-    <p class="hook">Added a plugin to your team&#x27;s bundle, but nobody got it?</p>
-    <div class="badges"><span class="badge"><b>Time</b> 10 min</span><span class="badge"><b>Level</b> intermediate</span><span class="badge"><b>For</b> platform teams</span></div>
-    <div class="row"><b>What</b><div>A dependency is another plugin that your plugin needs. A bundle is a plugin that mostly lists dependencies, so one install brings a whole set. Before 2.1.319, claude plugin update, the &quot;Update now&quot; button in /plugin, and background auto-update did not install a dependency that a new version added. Now they do.</div></div>
-    <div class="row"><b>Why</b><div>A team can add a plugin to its bundle, publish a new version, and know people get it on update.</div></div>
-    <div class="row"><b>Needs</b><div>Version 2.1.319 or later. A version range such as ^3.0 needs the dependency&#x27;s maintainer to tag releases (docs).</div></div>
-    <div class="path">The bundle&#x27;s .claude-plugin/plugin.json (the docs&#x27; example):</div>
-    <div class="codebox"><pre>{
-  &quot;name&quot;: &quot;backend-standard&quot;,
-  &quot;version&quot;: &quot;1.0.0&quot;,
-  &quot;description&quot;: &quot;Standard plugin set for backend engineers&quot;,
-  &quot;dependencies&quot;: [
-    &quot;secrets-vault&quot;,
-    &quot;deploy-kit&quot;,
-    { &quot;name&quot;: &quot;db-migrate&quot;, &quot;version&quot;: &quot;^3.0&quot; },
-    &quot;oncall-runbook&quot;
-  ]
-}</pre></div>
-    <div class="path">Then in your shell, and run /reload-plugins in an open session (from the docs):</div>
-    <div class="codebox"><pre>claude plugin update backend-standard</pre></div>
-    <div class="check"><b>Did it work?</b> Run /plugin and look for the newly added dependency among your installed plugins.</div>
+    <div><div class="cat">Marketplaces <span class="tag new">CHANGED · v2.1.325 · NOV 13</span></div><h3>Pin a plugin store to one commit</h3></div></div>
+    <p class="hook">Reviewed your team&#x27;s plugin store, then someone pushed a change?</p>
+    <div class="badges"><span class="badge"><b>Time</b> 15 min</span><span class="badge"><b>Level</b> intermediate</span><span class="badge"><b>For</b> platform teams</span></div>
+    <div class="row"><b>What</b><div>A marketplace is a store that lists plugins. Its ref picks which version of its git repo to use. A commit SHA is the long ID of one exact change. The 2.1.325 notes say ref now takes the full SHA of any commit on a branch or tag.</div></div>
+    <div class="row"><b>Why</b><div>Refreshes and auto-updates can&#x27;t move you off a commit you checked. That gives a team one known set of plugins.</div></div>
+    <div class="row"><b>Needs</b><div>The docs say v2.1.324 or later. Update Claude Code on every machine first, because older versions can&#x27;t load a store pinned this way. Reserved names such as claude-plugins-official can&#x27;t use a SHA. A plugin entry with its own remote source can still update, so pin it too with sha (docs).</div></div>
+    <div class="path">The marketplace source (the docs&#x27; example; use your repo and your commit&#x27;s SHA):</div>
+    <div class="codebox"><pre>{ &quot;source&quot;: &quot;github&quot;, &quot;repo&quot;: &quot;acme-corp/plugins&quot;, &quot;ref&quot;: &quot;a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0&quot; }</pre></div>
+    <div class="check"><b>Did it work?</b> Push a new commit to the store&#x27;s repo. After a refresh, your plugins should stay on the pinned commit.</div>
   </article>
   <article class="feature" id="f5">
     <div class="fhead"><div class="icon"><svg><use href="#i-flask"/></svg></div>
-    <div><div class="cat">Evals <span class="tag new">FIXED · v2.1.319 · NOV 6</span></div><h3>Test that a tool is never called</h3></div></div>
-    <p class="hook">How do you prove your plugin did not run a command?</p>
-    <div class="badges"><span class="badge"><b>Time</b> 20 min</span><span class="badge"><b>Level</b> intermediate</span><span class="badge"><b>For</b> plugin authors</span></div>
-    <div class="row"><b>What</b><div>claude plugin eval runs your plugin against test cases and scores them. A grader is one pass or fail check. A tool_used grader counts calls to a tool, and its min is 1 unless you set it. Before 2.1.319, eval warnings could suggest max: 0 for a tool that must not be called. With min still at 1, that check could never pass. The bad tip is gone. The docs say to set both min: 0 and max: 0.</div></div>
-    <div class="row"><b>Why</b><div>&quot;Never do this&quot; checks are how you test a plugin&#x27;s safety rules.</div></div>
-    <div class="row"><b>Needs</b><div>Version 2.1.319 for the fix. Git 2.31 or later if git is installed (docs). Eval runs use your plan&#x27;s usage or your API bill.</div></div>
-    <div class="path">Save as evals/first-case/graders/no-bash.md (my example; the fields are from the docs):</div>
-    <div class="codebox"><pre>---
-type: tool_used
-tool: Bash
-min: 0
-max: 0
----</pre></div>
-    <div class="path">Then from your plugin&#x27;s root folder (from the docs):</div>
-    <div class="codebox"><pre>claude plugin eval .</pre></div>
-    <div class="check"><b>Did it work?</b> The report should show this grader pass on runs where Claude made no Bash call.</div>
+    <div><div class="cat">Validate <span class="tag new">ADDED · v2.1.323 · NOV 12</span></div><h3>Catch mod type errors before you ship</h3></div></div>
+    <p class="hook">Want CI to stop a broken mod before your team installs it?</p>
+    <div class="badges"><span class="badge"><b>Time</b> 5 min</span><span class="badge"><b>Level</b> beginner</span><span class="badge"><b>For</b> plugin authors</span></div>
+    <div class="row"><b>What</b><div>claude plugin validate checks a plugin&#x27;s files. Since 2.1.323, it also type checks a plugin&#x27;s TypeScript hooks module, the code behind a mod. Each finding is a warning. With --strict, a warning fails the run. Since 2.1.325, it also reports some unsafe paths and links in a plugin&#x27;s folder, which loading now skips.</div></div>
+    <div class="row"><b>Why</b><div>A type error found in CI costs minutes. Found on a teammate&#x27;s laptop, it costs a lot more.</div></div>
+    <div class="row"><b>Needs</b><div>Version 2.1.323 for type checks and 2.1.325 for the path checks. --strict treats warnings as errors (docs).</div></div>
+    <div class="path">In your shell or CI job (from the docs):</div>
+    <div class="codebox"><pre>claude plugin validate ./my-plugin --strict</pre></div>
+    <div class="check"><b>Did it work?</b> Exit code 0 means it passed. Exit code 1 prints &quot;Validation failed (--strict treats warnings as errors)&quot; when a warning stopped it.</div>
   </article>
-  <section class="band">
+  <section class="band safe" id="special">
+    <h2>Special Edition: Claude joined the meeting</h2>
+    <p>This week I made a short video about AI in meetings. Here is the short version.</p>
+    <p>A transcript gives you accurate minutes. You can search for what was decided. Every action item gets an owner.</p>
+    <p>For engineers, this matters a lot. Many design and architecture choices are made in meetings. That was always useful, but it was often lost when no one took notes. Now AI turns a transcript into minutes in seconds. That even works for older meetings, if you kept the recording or transcript.</p>
+    <p>Minutes are the context a large language model (LLM) needs: what we decided, why, and what we ruled out. Give them to Claude next to the code. It drafts the plan to build it. You review it and approve it.</p>
+    <p>Claude Meetings is now in beta for Team and Enterprise plans. Claude joins a Google Meet call as a visible participant.</p>
+    <p>Large regulated companies often lock down transcription. Reasons include consent laws, lawsuits against AI note takers, records rules and legal privilege. This is for your information only, not legal advice.</p>
+    <p>A bigger answer is to run Claude Managed Agents inside your own security perimeter. Anthropic offers this as a private beta.</p>
+    <p>Start small. Pick one internal meeting type. Tell everyone first. Have a person approve the notes.</p>
+    <p><b>Watch the video on the AI At The Edge YouTube channel:</b> <a href="https://www.youtube.com/@aiattheedge">https://www.youtube.com/@aiattheedge</a></p>
+  </section>
+  <section class="band" id="also">
     <h2>Also this week</h2>
     <ul class="src">
-      <li><b>2.1.319:</b> <code>--add-dir</code> folders now register plugin marketplaces only after you accept that folder's own trust dialog.</li>
-      <li><b>2.1.319:</b> a project's settings files or a plugin can no longer switch auto mode's server-side check back on once you switched it off outside the project.</li>
-      <li><b>2.1.319:</b> the Monitor tool's WebSocket watch now follows your Bash rules: a deny rule refuses it, and under an ask rule it no longer skips the prompt.</li>
-      <li><b>2.1.319:</b> with the Bash sandbox on, skills in <code>.claude/skills</code> folders below your starting folder load only if you start there or <code>/cd</code> there.</li>
-      <li><b>2.1.319:</b> MCP servers, including ones plugins add, can run a tool call as a task. Claude Code moves it to the background and reports the result when it ends.</li>
-      <li><b>2.1.319:</b> deny and ask rules and hook matchers written with a claude.ai connector's terminal name now work in Claude Desktop, once Desktop includes this version.</li>
-      <li><b>2.1.319:</b> on self-hosted runners, <code>--trust-workspace false</code> now also stops hooks in the repo's settings files and skills.</li>
-      <li><b>2.1.318:</b> <code>claude plugin validate</code> no longer passes a custom-named marketplace file that <code>claude plugin marketplace add</code> rejects.</li>
-      <li><b>2.1.318:</b> <code>claude plugin</code> commands no longer exit before a slow token refresh is saved, which could sign you out.</li>
-      <li><b>2.1.318:</b> variables a <code>Setup</code> hook writes to <code>CLAUDE_ENV_FILE</code> now reach the Bash tool in cloud sessions.</li>
-      <li><b>2.1.317:</b> exiting no longer asks about running background work just because a plugin monitor is running.</li>
-      <li><b>2.1.317:</b> headless sessions with many plugins that register commands no longer use lots of memory or start slowly.</li>
-      <li><b>2.1.317:</b> cloud sessions no longer call a working claude.ai connector broken when a synced plugin includes the same server.</li>
+      <li><b>2.1.323:</b> Correction to last week: the <code>subagentStatusLine</code> setting is removed. Subagent rows always use the default look, and files that still hold the key load as before. A plugin&#x27;s <code>agent</code> setting is deprecated: it still works, but now warns.</li>
+      <li><b>2.1.323:</b> plugin.json can set <code>engines[&quot;claude-code&quot;]</code>. A plugin outside its stated Claude Code version range is not installed, updated or loaded. The docs don&#x27;t show this field yet, so I left out a snippet.</li>
+      <li><b>2.1.323:</b> long-running hooks in <code>claude -p</code> and SDK sessions now send a progress signal every 30 seconds, so a host won&#x27;t end the turn as hung.</li>
+      <li><b>2.1.323:</b> <code>claude plugin install --json</code> now reports <code>unsetOptionCount</code>: how many <code>userConfig</code> options are not set yet.</li>
+      <li><b>2.1.323:</b> installs now show a warning, not success, when a plugin&#x27;s install command writes to stderr. A warning also shows when a plugin&#x27;s language server can&#x27;t start.</li>
+      <li><b>2.1.323:</b> marketplace and plugin installs fail when a git submodule isn&#x27;t on the commit its repo records.</li>
+      <li><b>2.1.323:</b> with <code>--trust-workspace false</code>, and in untrusted VS Code folders, a repo&#x27;s settings can&#x27;t turn off your hooks or turn plugins on or off.</li>
+      <li><b>2.1.325:</b> plugin MCP bundles (<code>.mcpb</code>, <code>.dxt</code>) now unpack under the plugins folder, so read-only plugin folders load.</li>
+      <li><b>2.1.325:</b> <code>.claude/skills</code> folders inside <code>--plugin-dir</code> plugins no longer load from a session started above them. Start Claude Code in the plugin folder instead.</li>
+      <li><b>2.1.325:</b> add-marketplace and install prompts now say plugins can run code on your computer, with access to your files and shell.</li>
+      <li><b>2.1.325:</b> remote-marketplace plugins that managed settings list in <code>prependPlugins</code> or <code>appendPlugins</code> count as the organization&#x27;s. <code>pluginDigests</code> is deprecated and ignored.</li>
+      <li><b>2.1.321:</b> a managed <code>extraKnownMarketplaces</code> name can&#x27;t be added from another source, and its plugins reinstall from the declared marketplace.</li>
+      <li><b>2.1.321:</b> plugin auto-updates no longer download a plugin again for each worktree or folder of a repo.</li>
+      <li><b>2.1.321:</b> a PreToolUse <code>mcp_tool</code> hook whose answer is over 16 MiB now refuses the call instead of being skipped.</li>
+      <li><b>2.1.322:</b> no plugin changes (fast mode on Vertex only).</li>
     </ul>
   </section>
-  <section class="band">
+  <section class="band" id="install">
     <h2>How to install a plugin</h2>
     <p>Official store plugins use this form, shown in Anthropic&#x27;s docs. In a session it opens the plugin&#x27;s details so you can review it and pick a scope first.</p>
     <div class="codebox"><pre>/plugin install commit-commands@claude-plugins-official</pre></div>
     <p class="fine">To add another store first, run <code>/plugin marketplace add &lt;owner&gt;/&lt;repo&gt;</code>. Then use <code>/plugin install &lt;plugin&gt;@&lt;marketplace&gt;</code>. After you change a plugin, run <code>/reload-plugins</code>.</p>
   </section>
-  <section class="band safe">
+  <section class="band safe" id="safe">
     <h2>Stay safe</h2>
-    <p style="margin:0">Plugins run code on your machine. Hooks and status line scripts run with your own user permissions. onFailure &quot;block&quot; only helps if the error reaches the SDK, so do not hide errors inside a guard. Read what a plugin and its dependencies do before you install them.</p>
+    <p style="margin:0">Plugins run code on your computer, with access to your files and shell. Hooks and mods run with your own user permissions. Only allow a skill by name if you know what it does. Pin a store only to a commit you have read.</p>
   </section>
   <section class="ask">
     <h2>Which of these would save <em>your team</em> the most time?</h2>
     <p class="blurb">Tell me in the comments.</p>
   </section>
   <section class="fine">
-    <p>Covers releases dated Mon Nov 2 to Mon Nov 9, 2026 (2.1.317, 2.1.318 and 2.1.319). Time and level badges are my own estimates. I did not run these snippets myself. They come from Anthropic&#x27;s Claude Code changelog and docs, except the status line settings and the eval grader, which are my examples.</p>
+    <p>Covers releases dated Mon Nov 9 to Sun Nov 15, 2026 (2.1.321, 2.1.322, 2.1.323 and 2.1.325). Time and level badges are my own estimates. I did not run these snippets myself. They come from Anthropic&#x27;s Claude Code changelog and docs, except the skill rule, the headless command and the hook output, which are my examples.</p>
     <b>Sources</b>
     <ul class="src">
-      <li><a href="https://code.claude.com/docs/en/changelog">Claude Code changelog (2.1.317 to 2.1.319)</a></li>
-      <li><a href="https://code.claude.com/docs/en/agent-sdk/hooks">Agent SDK hooks (block the action when a callback fails)</a></li>
-      <li><a href="https://code.claude.com/docs/en/statusline">Status line (subagent status lines)</a></li>
-      <li><a href="https://code.claude.com/docs/en/plugins/components">Add components to a plugin (hooks, default settings)</a></li>
-      <li><a href="https://code.claude.com/docs/en/hooks">Hooks reference (PostToolUse after an interrupt)</a></li>
-      <li><a href="https://code.claude.com/docs/en/plugins/dependencies">Plugin dependencies (bundles)</a></li>
-      <li><a href="https://code.claude.com/docs/en/plugin-evals">Plugin evals (tool_used grader)</a></li>
-      <li><a href="https://code.claude.com/docs/en/discover-plugins">Discover and install plugins</a></li>
+      <li><a href="https://code.claude.com/docs/en/changelog">Claude Code changelog (2.1.321 to 2.1.325)</a></li>
+      <li><a href="https://code.claude.com/docs/en/skills">Skills (allow or deny specific skills)</a></li>
+      <li><a href="https://code.claude.com/docs/en/scheduled-tasks">Scheduled tasks and /loop</a></li>
+      <li><a href="https://code.claude.com/docs/en/env-vars">Environment variables (CLAUDE_CODE_PLUGIN_DIR_WATCH)</a></li>
+      <li><a href="https://code.claude.com/docs/en/hooks">Hooks reference (PreToolUse decision control)</a></li>
+      <li><a href="https://code.claude.com/docs/en/plugins/marketplace-reference">Marketplace reference (pin ref to a commit SHA)</a></li>
+      <li><a href="https://code.claude.com/docs/en/plugins/cli-reference">Plugin CLI reference (plugin validate --strict)</a></li>
+      <li><a href="https://code.claude.com/docs/en/plugins/dependencies">Plugin dependencies</a></li>
+      <li><a href="https://code.claude.com/docs/en/plugin-evals">Plugin evals</a></li>
+      <li><a href="https://code.claude.com/docs/en/plugins/components">Add components to a plugin</a></li>
+      <li><a href="https://claude.com/resources/articles/claude-meetings">Introducing Claude Meetings, now in beta (Nov 12, 2026)</a></li>
+      <li><a href="https://claude.com/resources/articles/self-hosted-claude-managed-agents">Operate Claude Managed Agents inside your security perimeter (Nov 12, 2026)</a></li>
     </ul>
   </section>
 </div>
