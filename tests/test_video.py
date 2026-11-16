@@ -38,6 +38,13 @@ class ScriptFileTests(unittest.TestCase):
         s = script_file.parse(GOOD.replace("date:", "engine: avatar_iv\ndate:"))
         self.assertEqual(s.overrides, {"engine": "avatar_iv"})
 
+    def test_script_word_limit_override(self):
+        cfg = make_video.load_config()
+        plain = script_file.parse(GOOD)
+        self.assertEqual(make_video.word_limit(cfg, plain), cfg["limits"]["max_words"])
+        longer = script_file.parse(GOOD.replace("date:", "max_words: 1200\ndate:"))
+        self.assertEqual(make_video.word_limit(cfg, longer), 1200)
+
     def test_rejects_bad_front_matter(self):
         for text in ("no front matter", "---\ntitle: x\n---\nAI words", GOOD.replace("2026-11-02", "Nov 2")):
             with self.assertRaises(script_file.ScriptError):

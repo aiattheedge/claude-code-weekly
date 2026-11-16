@@ -47,6 +47,11 @@ def resolve_settings(config: dict, script: script_file.Script, env=os.environ) -
     return settings
 
 
+def word_limit(config: dict, script: script_file.Script) -> int:
+    """The script's own max_words when it sets one, otherwise the config limit."""
+    return int(script.overrides.get("max_words") or config["limits"]["max_words"])
+
+
 def video_disclosure(config: dict, script: script_file.Script):
     """Return (on-screen label, end-card lines) for the script's disclosure mode."""
     lines = list(script.end_card or config["end_card"]["lines"])
@@ -162,7 +167,7 @@ def main(argv=None) -> int:
     with open(args.script, encoding="utf-8") as f:
         script = script_file.parse(f.read())
     blocked = [t.strip() for t in os.environ.get("VIDEO_BLOCKED_TERMS", "").split(",")]
-    script_file.check(script, max_words=config["limits"]["max_words"],
+    script_file.check(script, max_words=word_limit(config, script),
                       disclosure_words=config["disclosure"]["require_ai_in_first_words"],
                       blocked_terms=blocked)
     settings = resolve_settings(config, script)

@@ -14,7 +14,8 @@ switch at section starts, so a label names the slide that shows while it is spok
 Optional front-matter keys override video/config.json for this video:
 engine, aspect_ratio, resolution, avatar_id, voice_id, motion_prompt, more_blinking,
 pitch (HeyGen voice pitch in semitones, -4 to 4), price_per_minute_usd (this look's rate, for the
-cost estimate) and max_cost_usd (refuse to render when the estimate is higher).
+cost estimate), max_cost_usd (refuse to render when the estimate is higher) and max_words (this
+video's word limit, for a longer one-off video; the config limit applies otherwise).
 """
 import dataclasses
 import datetime
@@ -24,7 +25,7 @@ REQUIRED_KEYS = ("title", "date")
 DISCLOSURE = re.compile(r"\bai-generated\b|\bai twin\b|\bdigital twin\b")
 DISCLOSURE_MODES = ("video", "post")  # "post": the disclosure is in the post text, not the video
 OVERRIDE_KEYS = ("engine", "aspect_ratio", "resolution", "avatar_id", "voice_id", "motion_prompt", "more_blinking",
-                 "pitch", "price_per_minute_usd", "max_cost_usd")
+                 "pitch", "price_per_minute_usd", "max_cost_usd", "max_words")
 
 
 class ScriptError(ValueError):
