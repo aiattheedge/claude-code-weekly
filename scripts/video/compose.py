@@ -53,6 +53,43 @@ def estimate_srt(text: str, duration: float, words_per_cue: int = 8) -> str:
     return "\n".join(cues)
 
 
+def shift_srt(srt: str, offset: float, start_number: int = 1) -> str:
+    """Move every cue in an SRT by offset seconds and renumber from start_number."""
+    out, n = [], start_number
+    for block in srt.strip().split("\n\n"):
+        lines = [l for l in block.strip().splitlines() if l.strip()]
+        timing = next((i for i, l in enumerate(lines) if "-->" in l), None)
+        if timing is None:
+            continue
+        start, end = (part.strip() for part in lines[timing].split("-->"))
+        t0 = _parse_timestamp(start) + offset
+        t1 = _parse_timestamp(end) + offset
+        out.append(f"{n}\n{_timestamp(t0)} --> {_timestamp(t1)}\n" + "\n".join(lines[timing + 1:]) + "\n")
+        n += 1
+    return "\n".join(out)
+
+
+def _parse_timestamp(stamp: str) -> float:
+    h, m, rest = stamp.split(":")
+    s, ms = rest.replace(".", ",").split(",")
+    return int(h) * 3600 + int(m) * 60 + int(s) + int(ms) / 1000
+
+
+def join_parts(parts: list, out_path: str) -> None:
+    """Join several renders of the same look end to end (video and audio), re-encoding once."""
+    if len(parts) == 1:
+        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-i", parts[0], "-c", "copy", out_path], check=True)
+        return
+    cmd = ["ffmpeg", "-y", "-loglevel", "error"]
+    for path in parts:
+        cmd += ["-i", path]
+    streams = "".join(f"[{i}:v][{i}:a]" for i in range(len(parts)))
+    cmd += ["-filter_complex", f"{streams}concat=n={len(parts)}:v=1:a=1[v][a]", "-map", "[v]", "-map", "[a]",
+            "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-pix_fmt", "yuv420p",
+            "-c:a", "aac", "-b:a", "192k", out_path]
+    subprocess.run(cmd, check=True)
+
+
 def _drawtext(textfile: str, font: str, size: int, x: str, y: str, box: bool = False, pad: int = 0) -> str:
     parts = [f"drawtext=fontfile={font}", f"textfile={textfile}", f"fontsize={size}",
              "fontcolor=white", f"x={x}", f"y={y}"]

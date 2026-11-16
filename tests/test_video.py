@@ -94,6 +94,31 @@ class ScriptFileTests(unittest.TestCase):
         self.assertTrue(500 <= s.word_count <= 700, s.word_count)
 
 
+class LongScriptTests(unittest.TestCase):
+    def test_short_script_is_one_part(self):
+        self.assertEqual(make_video.split_parts("one\n\ntwo", limit=100), ["one\n\ntwo"])
+
+    def test_long_script_splits_at_paragraphs_under_the_limit(self):
+        paragraphs = [("word " * 40).strip() for _ in range(10)]  # 199 chars each
+        parts = make_video.split_parts("\n\n".join(paragraphs), limit=1000)
+        self.assertEqual(len(parts), 3)
+        self.assertTrue(all(len(p) <= 1000 for p in parts))
+        self.assertEqual("\n\n".join(parts), "\n\n".join(paragraphs))
+
+    def test_research_edition_script_fits_two_parts(self):
+        with open(os.path.join(ROOT, "video", "script-2026-11-18.md"), encoding="utf-8") as f:
+            s = script_file.parse(f.read())
+        parts = make_video.split_parts(s.spoken_text)
+        self.assertEqual(len(parts), 2)
+        self.assertTrue(all(len(p) < 5000 for p in parts))
+
+    def test_shift_srt_moves_and_renumbers(self):
+        srt = "1\n00:00:01,000 --> 00:00:02,500\nHello there\n\n2\n00:00:03,000 --> 00:00:04,000\nAgain\n"
+        shifted = compose.shift_srt(srt, 60.25, start_number=5)
+        self.assertIn("5\n00:01:01,250 --> 00:01:02,750\nHello there", shifted)
+        self.assertIn("6\n00:01:03,250 --> 00:01:04,250\nAgain", shifted)
+
+
 class PayloadTests(unittest.TestCase):
     SCRIPT = script_file.Script(title="T", date="2026-11-02", spoken_text="This is an AI video.", overrides={})
     BASE = {"engine": "avatar_v", "resolution": "1080p", "aspect_ratio": "auto"}

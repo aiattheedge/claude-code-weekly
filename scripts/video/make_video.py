@@ -102,7 +102,27 @@ def _is_true(value) -> bool:
     return value is True or str(value).strip().lower() in ("true", "yes", "1")
 
 
-def build_payload(script: script_file.Script, settings: dict, look_id: str, voice_id: str) -> dict:
+MAX_INPUT_CHARS = 4800  # HeyGen refuses a script over 5,000 characters; keep a margin
+
+
+def split_parts(text: str, limit: int = MAX_INPUT_CHARS) -> list:
+    """Split spoken text at paragraph breaks into as few parts as HeyGen accepts."""
+    paragraphs = [p for p in text.split("\n\n") if p.strip()]
+    if any(len(p) > limit for p in paragraphs):
+        raise script_file.ScriptError(f"A paragraph is over {limit} characters; split it.")
+    parts, current = [], []
+    for p in paragraphs:
+        if current and len("\n\n".join(current + [p])) > limit:
+            parts.append("\n\n".join(current))
+            current = [p]
+        else:
+            current.append(p)
+    parts.append("\n\n".join(current))
+    return parts
+
+
+def build_payload(script: script_file.Script, settings: dict, look_id: str, voice_id: str,
+                  text: str = None, part: str = "") -> dict:
     engine = {"type": settings["engine"]}
     avatar_v = settings["engine"] == "avatar_v"
     if avatar_v and _is_true(settings.get("more_blinking")):
@@ -111,8 +131,8 @@ def build_payload(script: script_file.Script, settings: dict, look_id: str, voic
         "type": "avatar",
         "avatar_id": look_id,
         "voice_id": voice_id,
-        "script": script.spoken_text,
-        "title": f"{script.date} {script.title}",
+        "script": script.spoken_text if text is None else text,
+        "title": f"{script.date} {script.title}{part}",
         "resolution": settings["resolution"],
         "aspect_ratio": settings["aspect_ratio"],
         "engine": engine,
@@ -208,24 +228,42 @@ def main(argv=None) -> int:
 
     out_dir = os.path.join(os.environ.get("VIDEO_OUT_DIR", os.path.join(REPO_ROOT, "out", "video")), script.date)
     os.makedirs(out_dir, exist_ok=True)
-    payload = build_payload(script, settings, look["id"], voice_id)
+    texts = split_parts(script.spoken_text)
+    payloads = [build_payload(script, settings, look["id"], voice_id, text=text,
+                              part=f" (part {i} of {len(texts)})" if len(texts) > 1 else "")
+                for i, text in enumerate(texts, 1)]
     balance_before = api_balance(client)
-    video_id = client.create_video(payload, idempotency_key(payload))
-    print(f"HeyGen video id: {video_id}")
+    # Start every part first so HeyGen renders them side by side, then collect them in order.
+    video_ids = [client.create_video(p, idempotency_key(p)) for p in payloads]
+    print(f"HeyGen video ids: {', '.join(video_ids)}")
     limits = config["limits"]
-    data = client.wait_for_video(video_id, poll_seconds=limits["poll_seconds"],
-                                 timeout_minutes=limits["poll_timeout_minutes"])
+    raws, srts, seconds, caption_sources = [], [], 0.0, set()
+    for i, (video_id, text) in enumerate(zip(video_ids, texts), 1):
+        data = client.wait_for_video(video_id, poll_seconds=limits["poll_seconds"],
+                                     timeout_minutes=limits["poll_timeout_minutes"])
+        part_raw = os.path.join(out_dir, f"heygen-raw-{i}.mp4")
+        download(data["video_url"], part_raw)
+        part_seconds = compose.probe(part_raw)["duration"]
+        if data.get("subtitle_url"):
+            part_srt = os.path.join(out_dir, f"captions-{i}.srt")
+            download(data["subtitle_url"], part_srt)
+            with open(part_srt, encoding="utf-8") as f:
+                part_captions = f.read()
+            caption_sources.add("HeyGen")
+        else:
+            part_captions = compose.estimate_srt(text, part_seconds)
+            caption_sources.add("estimated from the script (HeyGen sent no subtitles)")
+        srts.append(compose.shift_srt(part_captions, seconds, start_number=1 + sum(s.count("-->") for s in srts)))
+        raws.append(part_raw)
+        seconds += part_seconds
 
     raw = os.path.join(out_dir, "heygen-raw.mp4")
-    download(data["video_url"], raw)
+    compose.join_parts(raws, raw)
     srt = os.path.join(out_dir, "captions.srt")
-    if data.get("subtitle_url"):
-        download(data["subtitle_url"], srt)
-        caption_source = "HeyGen"
-    else:
-        with open(srt, "w", encoding="utf-8") as f:
-            f.write(compose.estimate_srt(script.spoken_text, compose.probe(raw)["duration"]))
-        caption_source = "estimated from the script (HeyGen sent no subtitles)"
+    with open(srt, "w", encoding="utf-8") as f:
+        f.write("\n".join(srts))
+    caption_source = " and ".join(sorted(caption_sources))
+    video_id = ", ".join(video_ids)
 
     final = os.path.join(out_dir, f"claude-code-latest-{script.date}.mp4")
     base, caption_style = raw, compose.CAPTION_STYLE
@@ -245,10 +283,9 @@ def main(argv=None) -> int:
     compose.finish(base, srt, final, label=label,
                    end_lines=end_lines, end_seconds=config["end_card"]["seconds"],
                    workdir=out_dir, caption_style=caption_style)
-    seconds = data.get("duration") or compose.probe(raw)["duration"]
     with open(os.path.join(out_dir, "render.json"), "w", encoding="utf-8") as f:
-        json.dump({"video_id": video_id, "look_id": look["id"], "voice_id": voice_id,
-                   "engine": settings["engine"], "voice_settings": payload.get("voice_settings"),
+        json.dump({"video_id": video_id, "video_ids": video_ids, "parts": len(video_ids), "look_id": look["id"], "voice_id": voice_id,
+                   "engine": settings["engine"], "voice_settings": payloads[0].get("voice_settings"),
                    "duration_seconds": seconds, "captions": caption_source,
                    "balance_before_usd": balance_before, "balance_after_usd": api_balance(client)},
                   f, indent=2)
