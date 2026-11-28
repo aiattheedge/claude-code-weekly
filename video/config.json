@@ -17,7 +17,7 @@
   "limits": {
     "max_words": 900,
     "words_per_minute": 150,
-    "price_per_minute_usd": { "avatar_iii": 0.60, "avatar_iv": 4.83, "avatar_v": 7.20 },
+    "price_per_minute_usd": { "avatar_iii": 0.60, "avatar_iv": 4.83, "avatar_v": 7.20, "heygen-avatar-6": 6.00 },
     "poll_seconds": 20,
     "poll_timeout_minutes": 100
   },

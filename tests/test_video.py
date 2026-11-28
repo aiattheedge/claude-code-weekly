@@ -157,6 +157,21 @@ class PayloadTests(unittest.TestCase):
         with self.assertRaises(heygen_client.HeyGenError):
             make_video.check_cost({"cost_usd": 11.5}, {"max_cost_usd": "11"})
 
+    def test_nov_29_script_uses_avatar_6_under_its_cap(self):
+        with open(os.path.join(ROOT, "video", "script-2026-11-29.md"), encoding="utf-8") as f:
+            s = script_file.parse(f.read())
+        cfg = make_video.load_config()
+        settings = make_video.resolve_settings(cfg, s, env={})
+        self.assertEqual(settings["engine"], "heygen-avatar-6")
+        est = make_video.estimate(s, cfg, settings["engine"], settings.get("price_per_minute_usd"))
+        self.assertIsNotNone(est["cost_usd"])
+        make_video.check_cost(est, settings)
+        payload = make_video.build_payload(s, settings, settings["avatar_id"], settings["voice_id"])
+        self.assertEqual(payload["engine"], {"type": "heygen-avatar-6"})
+        self.assertNotIn("motion_prompt", payload)
+        self.assertEqual(len(make_video.split_parts(s.spoken_text)), 1)
+        slides.check(slides.load(ROOT, s.date), s.sections)
+
     def test_nov_16_script_settings(self):
         with open(os.path.join(ROOT, "video", "script-2026-11-16.md"), encoding="utf-8") as f:
             s = script_file.parse(f.read())

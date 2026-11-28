@@ -1,0 +1,42 @@
+[
+  {
+    "section": "The wait",
+    "html": "slide-01.html",
+    "png": "out/slides/2026-11-29/slide-01.png"
+  },
+  {
+    "section": "What Anthropic shipped",
+    "html": "slide-02.html",
+    "png": "out/slides/2026-11-29/slide-02.png"
+  },
+  {
+    "section": "The wait isn't the review",
+    "html": "slide-03.html",
+    "png": "out/slides/2026-11-29/slide-03.png"
+  },
+  {
+    "section": "Approvals as code",
+    "html": "slide-04.html",
+    "png": "out/slides/2026-11-29/slide-04.png"
+  },
+  {
+    "section": "Where I'd keep a human",
+    "html": "slide-05.html",
+    "png": "out/slides/2026-11-29/slide-05.png"
+  },
+  {
+    "section": "Read the fine print",
+    "html": "slide-06.html",
+    "png": "out/slides/2026-11-29/slide-06.png"
+  },
+  {
+    "section": "How I'd start",
+    "html": "slide-07.html",
+    "png": "out/slides/2026-11-29/slide-07.png"
+  },
+  {
+    "section": "Close",
+    "html": "slide-08.html",
+    "png": "out/slides/2026-11-29/slide-08.png"
+  }
+]
